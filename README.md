@@ -1,4 +1,4 @@
-# HospitalDB 🏥
+# HospitalDB
 Sistema Integrado de Gestión Hospitalaria — Proyecto Final BD2  
 Universidad Panamericana de Guatemala
 
