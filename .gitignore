@@ -1,0 +1,42 @@
+.env
+config/.env
+*.env
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# --- Logs (generados en runtime) ---
+logs/
+*.log
+
+# --- Base de datos y backups ---
+database/backups/*.sql
+database/backups/*.zip
+*.dump
+
+# --- ETL - archivos de fuentes de datos ---
+etl/sources/*.csv
+etl/sources/*.xlsx
+
+# --- IDEs ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+htmlcov/
