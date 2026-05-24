@@ -22,3 +22,7 @@ colorlog==6.8.2                 # Logs con colores en consola
 # --- Testing ---
 pytest==8.2.1
 pytest-mock==3.14.0
+
+# --- APIREST ---
+fastapi==0.115.0
+uvicorn==0.30.0

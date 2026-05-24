@@ -8,6 +8,7 @@ from config.database import db_cursor
 
 logger = logging.getLogger(__name__)
 
+# Minutos de duración de una sesión activa
 SESSION_DURATION_MINUTES = int(os.getenv("SESSION_DURATION_MINUTES", 60))
 MAX_INTENTOS_FALLIDOS    = 5
 
@@ -67,6 +68,15 @@ def login(username: str, password: str, ip_origen: str = None) -> dict | None:
             )
             logger.warning("Login fallido — contraseña incorrecta: %s", username)
             return None
+
+        # Si ya se inicio sesion se invaldan tokens anteriores
+        cursor.execute("""
+            UPDATE sesion SET activa = 0
+            WHERE USUARIO_SISTEMA_id_usuario = %s AND activa = 1
+        """, (usuario["id_usuario"],))
+        if cursor.rowcount > 0:
+            logger.info("Sesiones anteriores invalidadas → usuario: %s", username)
+
 
         token = secrets.token_hex(32)
         ahora = datetime.now()
@@ -184,3 +194,44 @@ def _registrar_auditoria(cursor, id_usuario: int, accion: str,
              fecha_hora, ip_origen, USUARIO_SISTEMA_id_usuario)
         VALUES (%s, %s, %s, %s, NOW(), %s, %s)
     """, (accion, tabla, id_registro, datos_anteriores, ip_origen, id_usuario))
+
+
+def sesion_activa(username: str) -> dict | None:
+    """
+    Verifica si el usuario ya tiene una sesión activa y no expirada.
+    Retorna los datos de la sesión o None si no hay sesión activa.
+    """
+    with db_cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                s.token_sesion,
+                s.fecha_expiracion,
+                u.id_usuario,
+                u.username,
+                r.nombre_rol
+            FROM sesion          s
+            JOIN usuario_sistema u  ON u.id_usuario = s.USUARIO_SISTEMA_id_usuario
+            JOIN usuario_rol     ur ON ur.USUARIO_SISTEMA_id_usuario = u.id_usuario
+            JOIN rol              r  ON r.id_rol = ur.ROL_id_rol
+            WHERE u.username = %s
+              AND s.activa   = 1
+              AND s.fecha_expiracion > NOW()
+            ORDER BY s.fecha_inicio DESC
+            LIMIT 1
+        """, (username,))
+
+        sesion = cursor.fetchone()
+        if not sesion:
+            return None
+        from datetime import datetime
+        restante = sesion["fecha_expiracion"] - datetime.now()
+        minutos  = int(restante.total_seconds() // 60)
+        segundos = int(restante.total_seconds() % 60)
+
+        return {
+            "token":      sesion["token_sesion"],
+            "username":   sesion["username"],
+            "rol":        sesion["nombre_rol"],
+            "expiracion": sesion["fecha_expiracion"].isoformat(),
+            "tiempo_restante": f"{minutos}m {segundos}s",
+        }
