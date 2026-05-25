@@ -58,7 +58,7 @@ CREATE TABLE medico (
     id_medico               INT             NOT NULL AUTO_INCREMENT,
     nombre                  VARCHAR(100)    NOT NULL,
     apellido                VARCHAR(100)    NOT NULL,
-    especialidad            VARCHAR(100)    NULL,
+    especialidad            VARCHAR(100)    NOT NULL,
     numero_colegiado        VARCHAR(100)    NOT NULL,
     activo                  TINYINT(1)      NOT NULL DEFAULT 1,
     AREA_HOSPITAL_id_area   INT             NOT NULL,

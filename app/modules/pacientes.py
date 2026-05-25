@@ -1,5 +1,6 @@
 import logging
 from config.database import db_cursor
+from app.utils.cifrado import guardar_dpi_cifrado
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,10 @@ def registrar_paciente(datos: dict, id_usuario: int) -> int:
         ))
 
         id_paciente = cursor.lastrowid
+
+        # Cifrar DPI si fue proporcionado
+        if datos.get("dpi_paciente"):
+            guardar_dpi_cifrado(id_paciente, datos["dpi_paciente"])
 
         _auditoria(cursor, id_usuario, "INSERT", "paciente", id_paciente)
         logger.info("Paciente registrado → id=%s", id_paciente)
@@ -68,7 +73,6 @@ def obtener_paciente(id_paciente: int) -> dict | None:
         return cursor.fetchone()
 
 def editar_paciente(id_paciente: int, datos: dict, id_usuario: int) -> bool:
-
     with db_cursor() as cursor:
         # Guardar estado anterior para auditoría
         cursor.execute(
@@ -102,12 +106,7 @@ def editar_paciente(id_paciente: int, datos: dict, id_usuario: int) -> bool:
         logger.info("Paciente actualizado → id=%s", id_paciente)
         return True
 
-
 def desactivar_paciente(id_paciente: int, id_usuario: int) -> bool:
-    """
-    Realiza una eliminación lógica (activo = 0).
-    El registro permanece en la BD para historial clínico.
-    """
     with db_cursor() as cursor:
         cursor.execute("""
             UPDATE paciente SET activo = 0
@@ -123,12 +122,7 @@ def desactivar_paciente(id_paciente: int, id_usuario: int) -> bool:
         return True
 
 def historial_paciente(id_paciente: int) -> dict:
-    """
-    Retorna el historial completo de un paciente:
-    citas, diagnósticos, prescripciones e ingresos.
-    """
     with db_cursor() as cursor:
-        # Citas
         cursor.execute("""
             SELECT c.id_cita, c.fecha_hora, c.estado, c.motivo,
                    CONCAT(m.nombre,' ',m.apellido) AS medico,
@@ -141,7 +135,6 @@ def historial_paciente(id_paciente: int) -> dict:
         """, (id_paciente,))
         citas = cursor.fetchall()
 
-        # Ingresos
         cursor.execute("""
             SELECT id_ingreso, fecha_ingreso, fecha_egreso,
                    motivo_ingreso, estado, nombre_area
