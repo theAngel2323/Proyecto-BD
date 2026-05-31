@@ -113,3 +113,24 @@ def _auditoria(cursor, id_usuario, accion, tabla, id_registro=None):
             (accion, tabla_afectada, id_registro, USUARIO_SISTEMA_id_usuario)
         VALUES (%s, %s, %s, %s)
     """, (accion, tabla, id_registro, id_usuario))
+
+
+def listar_todas_citas() -> list:
+    with db_cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                c.id_cita,
+                c.fecha_hora,
+                c.estado,
+                c.motivo,
+                c.PACIENTE_id_paciente,
+                c.MEDICO_id_medico,
+                CONCAT(p.nombre,' ',p.apellido) AS nombre_paciente,
+                CONCAT(m.nombre,' ',m.apellido) AS nombre_medico,
+                m.especialidad
+            FROM cita c
+            JOIN paciente p ON p.id_paciente = c.PACIENTE_id_paciente
+            JOIN medico   m ON m.id_medico   = c.MEDICO_id_medico
+            ORDER BY c.fecha_hora DESC
+        """)
+        return cursor.fetchall()

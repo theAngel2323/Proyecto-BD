@@ -8,6 +8,7 @@ from api.dependencies import get_usuario_actual
 from app.modules.citas import (
     agendar_cita, cancelar_cita, completar_cita,
     citas_por_medico, citas_por_fecha,
+    listar_todas_citas,
 )
 
 router = APIRouter()
@@ -33,7 +34,8 @@ def listar_citas(
         return citas_por_fecha(fecha)
     if id_medico:
         return citas_por_medico(id_medico, solo_pendientes)
-    return {"detalle": "Especifica ?fecha=YYYY-MM-DD o ?id_medico=N"}
+    return listar_todas_citas()
+#--{"detalle": "Especifica ?fecha=YYYY-MM-DD o ?id_medico=N"}
 
 
 # ---- POST /api/citas ----

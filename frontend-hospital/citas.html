@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HospitalDB - Citas Medicas</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .estado-pill { display:inline-block; padding:5px 11px; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid #e5e7eb; background:#fff; color:#6b7280; margin:3px; transition:all 0.15s; }
+        .estado-pill.seleccionado { background:#1e3a6e; color:#fff; border-color:#1e3a6e; }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+    <nav id="topnav" class="topnav"></nav>
+
+    <div class="body-wrap">
+        <aside id="sidebar" class="sidebar"></aside>
+
+        <main class="content">
+
+            <div class="page-header">
+                <div>
+                    <h1>Agenda Medica</h1>
+                    <p id="fecha-titulo">Cargando</p>
+                </div>
+                <div class="page-header-btns">
+                    <button class="btn-secondary" onclick="loadCitas()">
+                        <i class="ti ti-refresh"></i>Actualizar
+                    </button>
+                    <button class="btn-primary" onclick="openModal('modal-cita')">
+                        <i class="ti ti-plus"></i>Nueva Cita
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros en barra horizontal -->
+            <div class="filter-bar" style="flex-wrap:wrap;gap:12px;align-items:center">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <label style="font-size:12.5px;font-weight:500;color:#374151;white-space:nowrap">Fecha</label>
+                    <input type="date" id="filtro-fecha" class="form-input" style="width:160px" onchange="renderCitas()">
+                    <button class="btn-secondary" style="padding:6px 10px;font-size:12px" onclick="setFechaHoy()">Hoy</button>
+                    <button class="btn-secondary" style="padding:6px 10px;font-size:12px" onclick="setFechaManana()">Manana</button>
+                    <button class="btn-secondary" style="padding:6px 10px;font-size:12px" onclick="limpiarFecha()">Todas</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <label style="font-size:12.5px;font-weight:500;color:#374151;white-space:nowrap">Medico</label>
+                    <select id="filtro-medico" class="form-input" style="width:200px" onchange="renderCitas()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                    <label style="font-size:12.5px;font-weight:500;color:#374151">Estado</label>
+                    <span class="estado-pill seleccionado" onclick="setEstado(this, '')">Todos</span>
+                    <span class="estado-pill" onclick="setEstado(this, 'Pendiente')">Pendiente</span>
+                    <span class="estado-pill" onclick="setEstado(this, 'Confirmada')">Confirmada</span>
+                    <span class="estado-pill" onclick="setEstado(this, 'Completada')">Completada</span>
+                    <span class="estado-pill" onclick="setEstado(this, 'Cancelada')">Cancelada</span>
+                </div>
+            </div>
+
+            <!-- Tabla de citas -->
+            <div class="card">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Paciente</th>
+                                <th>Medico</th>
+                                <th>Motivo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-citas">
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">
+                                    <span class="spinner spinner-dark"></span> Cargando citas...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer">
+                    <p id="citas-info">-</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- Modal nueva cita -->
+<div id="modal-cita" class="modal-overlay hidden">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Nueva Cita Medica</h2>
+            <button class="modal-close" onclick="closeModal('modal-cita')">x</button>
+        </div>
+        <div class="modal-body">
+            <div id="cita-alert" class="hidden"></div>
+            <div class="form-group">
+                <label class="form-label">Fecha y Hora *</label>
+                <input id="c-fecha" type="datetime-local" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Paciente *</label>
+                <select id="c-paciente" class="form-input" required>
+                    <option value="">Seleccionar paciente...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Medico *</label>
+                <select id="c-medico" class="form-input" required>
+                    <option value="">Seleccionar medico...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Motivo *</label>
+                <textarea id="c-motivo" class="form-input" required
+                          placeholder="Descripcion del motivo de consulta..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Estado</label>
+                <select id="c-estado" class="form-input">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Confirmada">Confirmada</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modal-cita')">Cancelar</button>
+            <button id="btn-cita" class="btn-primary" onclick="crearCita()">
+                <i class="ti ti-calendar-plus"></i>Agendar Cita
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/layout.js"></script>
+<script>
+    Auth.requireLogin();
+    renderLayout('citas.html');
+
+    var todasCitas   = [];
+    var filtroEstado = '';
+
+    function getFechaHoy() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    function setFechaHoy() {
+        document.getElementById('filtro-fecha').value = getFechaHoy();
+        renderCitas();
+    }
+
+    function setFechaManana() {
+        var d = new Date();
+        d.setDate(d.getDate() + 1);
+        document.getElementById('filtro-fecha').value = d.toISOString().split('T')[0];
+        renderCitas();
+    }
+
+    // Quita el filtro de fecha para mostrar todas las citas
+    function limpiarFecha() {
+        document.getElementById('filtro-fecha').value = '';
+        renderCitas();
+    }
+
+    function setEstado(btn, estado) {
+        document.querySelectorAll('.estado-pill').forEach(function(b) {
+            b.classList.remove('seleccionado');
+        });
+        btn.classList.add('seleccionado');
+        filtroEstado = estado;
+        renderCitas();
+    }
+
+    // Carga pacientes para el dropdown del modal
+    async function loadDropdownPacientes() {
+        try {
+            var pacientes = await API.getPacientes() || [];
+            var select    = document.getElementById('c-paciente');
+            select.innerHTML = '<option value="">Seleccionar paciente...</option>';
+            pacientes.forEach(function(p) {
+                if (p.activo !== 0 && p.activo !== false) {
+                    var opt = document.createElement('option');
+                    opt.value = p.id_paciente;
+                    opt.textContent = p.nombre + ' ' + p.apellido;
+                    select.appendChild(opt);
+                }
+            });
+        } catch (err) {}
+    }
+
+    // Carga todas las citas y construye el dropdown de medicos desde ellas
+    async function loadCitas() {
+        document.getElementById('tabla-citas').innerHTML =
+            '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">' +
+            '<span class="spinner spinner-dark"></span> Cargando...</td></tr>';
+
+        try {
+            todasCitas = await API.getCitas() || [];
+        } catch (err) {
+            todasCitas = [];
+            document.getElementById('tabla-citas').innerHTML =
+                '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">' +
+                'Error al cargar citas.</td></tr>';
+            return;
+        }
+
+        document.getElementById('fecha-titulo').textContent =
+            new Date().toLocaleDateString('es-GT', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+            });
+
+        // Inicializar con fecha de hoy
+        if (!document.getElementById('filtro-fecha').value) {
+            document.getElementById('filtro-fecha').value = getFechaHoy();
+        }
+
+        // Construir dropdown de medicos extrayendo datos de las citas
+        var medicosVistos = {};
+        todasCitas.forEach(function(c) {
+            var idMed  = c.MEDICO_id_medico;
+            var nombre = c.nombre_medico || ('Medico #' + idMed);
+            if (idMed && !medicosVistos[idMed]) {
+                medicosVistos[idMed] = nombre;
+            }
+        });
+
+        var filtroMed   = document.getElementById('filtro-medico');
+        var valorActual = filtroMed.value;
+        filtroMed.innerHTML = '<option value="">Todos</option>';
+
+        var selectMedModal = document.getElementById('c-medico');
+        selectMedModal.innerHTML = '<option value="">Seleccionar medico...</option>';
+
+        Object.keys(medicosVistos).forEach(function(id) {
+            var opt1 = document.createElement('option');
+            opt1.value = id;
+            opt1.textContent = medicosVistos[id];
+            if (id === valorActual) opt1.selected = true;
+            filtroMed.appendChild(opt1);
+
+            var opt2 = document.createElement('option');
+            opt2.value = id;
+            opt2.textContent = medicosVistos[id];
+            selectMedModal.appendChild(opt2);
+        });
+
+        renderCitas();
+    }
+
+    // Aplica los tres filtros: fecha, medico y estado
+    function renderCitas() {
+        var filtroFecha  = document.getElementById('filtro-fecha').value;
+        var filtroMedico = document.getElementById('filtro-medico').value;
+
+        var filtradas = todasCitas.filter(function(c) {
+            var coincideEstado = !filtroEstado || c.estado === filtroEstado;
+            var coincideMedico = !filtroMedico || String(c.MEDICO_id_medico) === filtroMedico;
+            // Comparar solo la parte de fecha (YYYY-MM-DD) del datetime
+            var coincideFecha  = !filtroFecha  ||
+                (c.fecha_hora && c.fecha_hora.toString().startsWith(filtroFecha));
+            return coincideEstado && coincideMedico && coincideFecha;
+        });
+
+        var tbody = document.getElementById('tabla-citas');
+
+        if (filtradas.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">' +
+                'No hay citas con los filtros seleccionados. Prueba con "Todas" para ver todo.</td></tr>';
+        } else {
+            tbody.innerHTML = filtradas.map(function(c) {
+                var nombrePaciente = c.nombre_paciente || ('Paciente #' + c.PACIENTE_id_paciente);
+                var nombreMedico   = c.nombre_medico   || ('Medico #'   + c.MEDICO_id_medico);
+                var puedeAccion    = c.estado !== 'Cancelada' && c.estado !== 'Completada';
+                var acciones = puedeAccion
+                    ? '<button class="action-btn" title="Completar" onclick="accionCita(' + c.id_cita + ',\'completar\')"><i class="ti ti-circle-check"></i></button>' +
+                      '<button class="action-btn" title="Cancelar"  onclick="accionCita(' + c.id_cita + ',\'cancelar\')"><i class="ti ti-circle-x"></i></button>'
+                    : '<span class="text-muted text-xs">-</span>';
+
+                return '<tr>' +
+                    '<td style="font-weight:600;color:#111827">' +
+                        formatTime(c.fecha_hora) +
+                        '<br><span class="text-xs text-muted">' + formatDate(c.fecha_hora) + '</span>' +
+                    '</td>' +
+                    '<td>' + nombrePaciente + '</td>' +
+                    '<td>' + nombreMedico + '</td>' +
+                    '<td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' +
+                        (c.motivo || '-') +
+                    '</td>' +
+                    '<td><span class="badge">' + (c.estado || 'Pendiente') + '</span></td>' +
+                    '<td>' + acciones + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        document.getElementById('citas-info').textContent =
+            'Mostrando ' + filtradas.length + ' de ' + todasCitas.length + ' citas';
+    }
+
+    // Completa o cancela una cita
+    async function accionCita(id, accion) {
+        var msg = accion === 'completar' ? 'Completar esta cita?' : 'Cancelar esta cita?';
+        if (!confirm(msg)) return;
+        try {
+            if (accion === 'completar') await API.completarCita(id);
+            else await API.cancelarCita(id);
+            loadCitas();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    // Crea una nueva cita con los datos del formulario
+    async function crearCita() {
+        hideAlert('cita-alert');
+        var idPaciente = document.getElementById('c-paciente').value;
+        var idMedico   = document.getElementById('c-medico').value;
+        var fecha      = document.getElementById('c-fecha').value;
+        var motivo     = document.getElementById('c-motivo').value.trim();
+        var estado     = document.getElementById('c-estado').value;
+
+        if (!fecha || !idPaciente || !idMedico || !motivo) {
+            showAlert('cita-alert', 'Todos los campos con * son obligatorios.', 'error');
+            return;
+        }
+
+        setLoading('btn-cita', true);
+        try {
+            await API.crearCita({
+                fecha_hora:  fecha,
+                id_paciente: parseInt(idPaciente),
+                id_medico:   parseInt(idMedico),
+                motivo:      motivo,
+                estado:      estado,
+                id_area:     1
+            });
+            closeModal('modal-cita');
+            loadCitas();
+        } catch (err) {
+            showAlert('cita-alert', err.message, 'error');
+        } finally {
+            setLoading('btn-cita', false);
+        }
+    }
+
+    // Inicializar
+    async function init() {
+        await loadDropdownPacientes();
+        await loadCitas();
+    }
+
+    init();
+</script>
+
+</body>
+</html>

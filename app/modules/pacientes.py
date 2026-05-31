@@ -38,6 +38,7 @@ def buscar_pacientes(termino: str = "", solo_activos: bool = True) -> list:
                 nombre,
                 apellido,
                 fecha_nacimiento,
+                dpi_paciente,
                 telefono,
                 fecha_registro,
                 activo,
@@ -89,12 +90,14 @@ def editar_paciente(id_paciente: int, datos: dict, id_usuario: int) -> bool:
             SET nombre           = %s,
                 apellido         = %s,
                 fecha_nacimiento = %s,
+                dpi_paciente = %s,
                 telefono         = %s
             WHERE id_paciente = %s
         """, (
             datos["nombre"],
             datos["apellido"],
             datos["fecha_nacimiento"],
+            datos.get("dpi_paciente"),
             datos.get("telefono"),
             id_paciente,
         ))

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HospitalDB - Ingresos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app-wrapper">
+
+    <nav id="topnav" class="topnav"></nav>
+
+    <div class="body-wrap">
+        <aside id="sidebar" class="sidebar"></aside>
+
+        <main class="content">
+
+            <div class="page-header">
+                <div>
+                    <h1>Control de Ingresos y Egresos</h1>
+                    <p>Monitoreo del flujo de pacientes hospitalarios.</p>
+                </div>
+                <div class="page-header-btns">
+                    <button class="btn-secondary" onclick="loadIngresos()">
+                        <i class="ti ti-refresh"></i>Actualizar
+                    </button>
+                    <button class="btn-primary" onclick="openModal('modal-ingreso')">
+                        <i class="ti ti-plus"></i>Nuevo Ingreso
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros en barra horizontal -->
+            <div class="filter-bar">
+                <label style="font-size:12.5px;font-weight:500;color:#374151;white-space:nowrap">Area</label>
+                <select id="filtro-area" class="form-input" style="width:200px" onchange="loadIngresos()">
+                    <option value="">Todas las Areas</option>
+                </select>
+                <div class="filter-divider"></div>
+                <label style="font-size:12.5px;font-weight:500;color:#374151;white-space:nowrap">Fecha</label>
+                <input type="date" id="filtro-fecha" class="form-input" style="width:160px">
+            </div>
+
+            <!-- Tarjetas de resumen -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-total-ingresos">-</div>
+                    <div class="stat-card-label">Ingresos Activos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-areas">-</div>
+                    <div class="stat-card-label">Areas con Ingresos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-camas-disp">-</div>
+                    <div class="stat-card-label">Camas Disponibles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-ocupacion">-</div>
+                    <div class="stat-card-label">Ocupacion General</div>
+                </div>
+            </div>
+
+            <!-- Tabla de ingresos activos -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Ingresos Activos</h3>
+                    <span class="text-sm text-muted" id="ingresos-info">-</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Area</th>
+                                <th>Motivo</th>
+                                <th>Fecha Ingreso</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-ingresos">
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">
+                                    <span class="spinner spinner-dark"></span> Cargando...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- Modal nuevo ingreso -->
+<div id="modal-ingreso" class="modal-overlay hidden">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Registrar Ingreso</h2>
+            <button class="modal-close" onclick="closeModal('modal-ingreso')">x</button>
+        </div>
+        <div class="modal-body">
+            <div id="ingreso-alert" class="hidden"></div>
+            <div class="form-group">
+                <label class="form-label">Paciente *</label>
+                <select id="i-paciente" class="form-input" required>
+                    <option value="">Seleccionar paciente...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Medico *</label>
+                <select id="i-medico" class="form-input" required>
+                    <option value="">Seleccionar medico...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Area *</label>
+                <select id="i-area" class="form-input" required>
+                    <option value="">Seleccionar area...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Motivo de Ingreso</label>
+                <textarea id="i-motivo" class="form-input"
+                          placeholder="Descripcion del motivo de ingreso..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modal-ingreso')">Cancelar</button>
+            <button id="btn-ingreso" class="btn-primary" onclick="guardarIngreso()">
+                <i class="ti ti-circle-check"></i>Registrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmacion de egreso con diseno propio -->
+<div id="modal-egreso" class="modal-overlay hidden">
+    <div class="modal" style="max-width:420px">
+        <div class="modal-header">
+            <h2>Registrar Egreso</h2>
+            <button class="modal-close" onclick="closeModal('modal-egreso')">x</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="egreso-id">
+            <div class="alert alert-warning">
+                <i class="ti ti-alert-triangle"></i>
+                <span>Esta accion registrara la salida del paciente del hospital. No se puede deshacer.</span>
+            </div>
+            <p style="font-size:14px;color:#374151;margin-top:14px;line-height:1.6">
+                Confirma que deseas registrar el egreso de este paciente.
+                Se guardara la fecha y hora actual como fecha de egreso.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modal-egreso')">Cancelar</button>
+            <button class="btn-primary" onclick="confirmarEgreso()">
+                <i class="ti ti-door-exit"></i>Confirmar Egreso
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/layout.js"></script>
+<script>
+    Auth.requireLogin();
+    renderLayout('ingresos.html');
+
+    // Carga los ingresos activos y la ocupacion en paralelo
+    async function loadIngresos() {
+        var idArea = document.getElementById('filtro-area').value;
+
+        document.getElementById('tabla-ingresos').innerHTML =
+            '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">' +
+            '<span class="spinner spinner-dark"></span> Cargando...</td></tr>';
+
+        try {
+            var resultados = await Promise.allSettled([
+                API.getIngresos(idArea),
+                API.getOcupacion()
+            ]);
+
+            var ingresos  = resultados[0].status === 'fulfilled' ? resultados[0].value || [] : [];
+            var ocupacion = resultados[1].status === 'fulfilled' ? resultados[1].value || [] : [];
+
+            renderIngresos(ingresos);
+            actualizarStats(ingresos, ocupacion);
+            actualizarDropdownAreas(ocupacion);
+
+        } catch (err) {
+            document.getElementById('tabla-ingresos').innerHTML =
+                '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">' +
+                'Error al cargar datos del servidor.</td></tr>';
+        }
+    }
+
+    // Dibuja la tabla de ingresos
+    function renderIngresos(ingresos) {
+        document.getElementById('ingresos-info').textContent =
+            ingresos.length + ' registros activos';
+
+        var tbody = document.getElementById('tabla-ingresos');
+
+        if (ingresos.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;padding:40px;color:#9ca3af">' +
+                'No hay ingresos activos en este momento.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = ingresos.map(function(ing) {
+            var nombrePaciente = ing.nombre_paciente ||
+                ing.paciente || ('Paciente #' + ing.PACIENTE_id_paciente);
+            var nombreArea = ing.nombre_area ||
+                ing.area || ('Area #' + ing.AREA_HOSPITAL_id_area);
+
+            return '<tr>' +
+                '<td>' +
+                    '<div style="display:flex;align-items:center;gap:8px">' +
+                        '<span class="pat-av">' +
+                            nombrePaciente.slice(0, 2).toUpperCase() +
+                        '</span>' +
+                        nombrePaciente +
+                    '</div>' +
+                '</td>' +
+                '<td>' + nombreArea + '</td>' +
+                '<td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' +
+                    (ing.motivo_ingreso || '-') +
+                '</td>' +
+                '<td class="text-sm text-muted">' + formatDate(ing.fecha_ingreso) + '</td>' +
+                '<td><span class="badge">' + (ing.estado || 'Activo') + '</span></td>' +
+                '<td>' +
+                    '<button class="action-btn" title="Registrar egreso"' +
+                        ' onclick="darEgreso(' + ing.id_ingreso + ')">' +
+                        '<i class="ti ti-door-exit"></i>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+    }
+
+    // Actualiza las tarjetas de estadisticas
+    function actualizarStats(ingresos, ocupacion) {
+        var totalCamas    = ocupacion.reduce(function(s, a) { return s + (a.capacidad_camas || 0); }, 0);
+        var totalOcupadas = ocupacion.reduce(function(s, a) { return s + (a.ocupados || 0); }, 0);
+        var totalDisp     = totalCamas - totalOcupadas;
+        var pct = totalCamas > 0 ? Math.round((totalOcupadas / totalCamas) * 100) : 0;
+
+        // Contar cuantas areas tienen al menos 1 ingreso activo
+        var areasConIngreso = {};
+        ingresos.forEach(function(ing) {
+            if (ing.AREA_HOSPITAL_id_area) areasConIngreso[ing.AREA_HOSPITAL_id_area] = true;
+        });
+
+        document.getElementById('stat-total-ingresos').textContent = ingresos.length;
+        document.getElementById('stat-areas').textContent           = Object.keys(areasConIngreso).length;
+        document.getElementById('stat-camas-disp').textContent      = totalDisp;
+        document.getElementById('stat-ocupacion').textContent       = pct + '%';
+    }
+
+    // Actualiza el dropdown de areas con los datos de ocupacion
+    function actualizarDropdownAreas(ocupacion) {
+        var selectFiltro = document.getElementById('filtro-area');
+        var valorActual  = selectFiltro.value;
+        selectFiltro.innerHTML = '<option value="">Todas las Areas</option>';
+
+        var selectModal = document.getElementById('i-area');
+        selectModal.innerHTML = '<option value="">Seleccionar area...</option>';
+
+        ocupacion.forEach(function(a) {
+            var opt1 = document.createElement('option');
+            opt1.value = a.id_area;
+            opt1.textContent = a.nombre_area;
+            if (String(a.id_area) === valorActual) opt1.selected = true;
+            selectFiltro.appendChild(opt1);
+
+            var opt2 = document.createElement('option');
+            opt2.value = a.id_area;
+            opt2.textContent = a.nombre_area + ' (cap. ' + a.capacidad_camas + ')';
+            selectModal.appendChild(opt2);
+        });
+    }
+
+    // Carga pacientes y medicos para los dropdowns del modal de ingreso
+    async function loadDropdowns() {
+        // Pacientes
+        try {
+            var pacientes = await API.getPacientes() || [];
+            var selPac    = document.getElementById('i-paciente');
+            pacientes.forEach(function(p) {
+                if (p.activo !== 0 && p.activo !== false) {
+                    var opt = document.createElement('option');
+                    opt.value = p.id_paciente;
+                    opt.textContent = p.nombre + ' ' + p.apellido;
+                    selPac.appendChild(opt);
+                }
+            });
+        } catch (err) {}
+
+        // Medicos: se extraen de las citas existentes
+        try {
+            var citas = await API.getCitas() || [];
+            var medicosVistos = {};
+            citas.forEach(function(c) {
+                var idMed = c.MEDICO_id_medico;
+                if (idMed && !medicosVistos[idMed]) {
+                    medicosVistos[idMed] = c.nombre_medico || ('Medico #' + idMed);
+                }
+            });
+            var selMed = document.getElementById('i-medico');
+            Object.keys(medicosVistos).forEach(function(id) {
+                var opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = medicosVistos[id];
+                selMed.appendChild(opt);
+            });
+        } catch (err) {}
+    }
+
+    // Guarda un nuevo ingreso en el backend
+    async function guardarIngreso() {
+        hideAlert('ingreso-alert');
+
+        var idPaciente = document.getElementById('i-paciente').value;
+        var idMedico   = document.getElementById('i-medico').value;
+        var idArea     = document.getElementById('i-area').value;
+        var motivo     = document.getElementById('i-motivo').value.trim();
+
+        if (!idPaciente || !idMedico || !idArea) {
+            showAlert('ingreso-alert', 'Paciente, medico y area son obligatorios.', 'error');
+            return;
+        }
+
+        setLoading('btn-ingreso', true);
+        try {
+            await API.crearIngreso({
+                id_paciente:    parseInt(idPaciente),
+                id_medico:      parseInt(idMedico),
+                id_area:        parseInt(idArea),
+                motivo_ingreso: motivo || null
+            });
+            closeModal('modal-ingreso');
+            loadIngresos();
+        } catch (err) {
+            showAlert('ingreso-alert', err.message, 'error');
+        } finally {
+            setLoading('btn-ingreso', false);
+        }
+    }
+
+    // Abre el modal de confirmacion de egreso
+    function darEgreso(id) {
+        document.getElementById('egreso-id').value = id;
+        openModal('modal-egreso');
+    }
+
+    // Confirma y ejecuta el egreso
+    async function confirmarEgreso() {
+        var id = document.getElementById('egreso-id').value;
+        closeModal('modal-egreso');
+        try {
+            await API.darEgreso(id);
+            loadIngresos();
+        } catch (err) {
+            alert('Error al registrar egreso: ' + err.message);
+        }
+    }
+
+    // Inicializar
+    document.getElementById('filtro-fecha').valueAsDate = new Date();
+
+    async function init() {
+        await loadDropdowns();
+        await loadIngresos();
+    }
+
+    init();
+</script>
+
+</body>
+</html>

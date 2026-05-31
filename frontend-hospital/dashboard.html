@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HospitalDB - Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app-wrapper">
+
+    <nav id="topnav" class="topnav"></nav>
+
+    <div class="body-wrap">
+        <aside id="sidebar" class="sidebar"></aside>
+
+        <main class="content">
+
+            <div class="page-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p id="welcome-msg">Cargando...</p>
+                </div>
+                <div class="page-header-btns">
+                    <button class="btn-secondary" onclick="loadStats()">
+                        <i class="ti ti-refresh"></i>Actualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjetas de KPIs con datos reales -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-pacientes">-</div>
+                    <div class="stat-card-label">Total Pacientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-citas">-</div>
+                    <div class="stat-card-label">Total Citas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-inventario">-</div>
+                    <div class="stat-card-label">Items en Inventario</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="stat-pendientes">-</div>
+                    <div class="stat-card-label">Citas Pendientes</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+
+                <!-- Ultimas 5 citas registradas -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ultimas Citas Registradas</h3>
+                        <a href="citas.html"
+                           style="font-size:12px;color:#1e3a6e;text-decoration:none;font-weight:500">
+                            Ver todas <i class="ti ti-arrow-right" style="font-size:11px"></i>
+                        </a>
+                    </div>
+                    <div id="ultimas-citas">
+                        <div style="text-align:center;padding:30px;color:#9ca3af">
+                            <span class="spinner spinner-dark"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen de citas por estado en barras -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Citas por Estado</h3>
+                        <a href="reportes.html"
+                           style="font-size:12px;color:#1e3a6e;text-decoration:none;font-weight:500">
+                            Ver reportes <i class="ti ti-arrow-right" style="font-size:11px"></i>
+                        </a>
+                    </div>
+                    <div class="card-body" id="citas-por-estado">
+                        <div style="text-align:center;padding:30px;color:#9ca3af">
+                            <span class="spinner spinner-dark"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Accesos rapidos -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Accesos Rapidos</h3>
+                </div>
+                <div class="card-body"
+                     style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+
+                    <a href="pacientes.html"
+                       style="display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;transition:border-color 0.15s"
+                       onmouseover="this.style.borderColor='#1e3a6e'"
+                       onmouseout="this.style.borderColor='#e5e7eb'">
+                        <div style="width:36px;height:36px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center">
+                            <i class="ti ti-user-plus" style="font-size:17px;color:#374151"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827">Nuevo Paciente</p>
+                            <p class="text-sm text-muted mt-1">Registrar expediente</p>
+                        </div>
+                    </a>
+
+                    <a href="citas.html"
+                       style="display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;transition:border-color 0.15s"
+                       onmouseover="this.style.borderColor='#1e3a6e'"
+                       onmouseout="this.style.borderColor='#e5e7eb'">
+                        <div style="width:36px;height:36px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center">
+                            <i class="ti ti-calendar-plus" style="font-size:17px;color:#374151"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827">Agendar Cita</p>
+                            <p class="text-sm text-muted mt-1">Nueva consulta</p>
+                        </div>
+                    </a>
+
+                    <a href="prescripciones.html"
+                       style="display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;transition:border-color 0.15s"
+                       onmouseover="this.style.borderColor='#1e3a6e'"
+                       onmouseout="this.style.borderColor='#e5e7eb'">
+                        <div style="width:36px;height:36px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center">
+                            <i class="ti ti-pill" style="font-size:17px;color:#374151"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827">Prescripcion</p>
+                            <p class="text-sm text-muted mt-1">Recetar medicamento</p>
+                        </div>
+                    </a>
+
+                    <a href="ingresos.html"
+                       style="display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;transition:border-color 0.15s"
+                       onmouseover="this.style.borderColor='#1e3a6e'"
+                       onmouseout="this.style.borderColor='#e5e7eb'">
+                        <div style="width:36px;height:36px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center">
+                            <i class="ti ti-bed" style="font-size:17px;color:#374151"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827">Nuevo Ingreso</p>
+                            <p class="text-sm text-muted mt-1">Hospitalizar paciente</p>
+                        </div>
+                    </a>
+
+                    <a href="reportes.html"
+                       style="display:flex;align-items:center;gap:12px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;transition:border-color 0.15s"
+                       onmouseover="this.style.borderColor='#1e3a6e'"
+                       onmouseout="this.style.borderColor='#e5e7eb'">
+                        <div style="width:36px;height:36px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center">
+                            <i class="ti ti-chart-bar" style="font-size:17px;color:#374151"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:13px;font-weight:600;color:#111827">Ver Reportes</p>
+                            <p class="text-sm text-muted mt-1">Tableros BI</p>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/layout.js"></script>
+<script>
+    Auth.requireLogin();
+    renderLayout('dashboard.html');
+
+    var user = Auth.getUser();
+    if (user) {
+        document.getElementById('welcome-msg').textContent =
+            'Bienvenido, ' + user.username;
+    }
+
+    async function loadStats() {
+        // Cargar pacientes, citas e inventario en paralelo
+        var res = await Promise.allSettled([
+            API.getPacientes(),
+            API.getCitas(),
+            API.getInventario()
+        ]);
+
+        var pacientes  = res[0].status === 'fulfilled' ? res[0].value || [] : [];
+        var citas      = res[1].status === 'fulfilled' ? res[1].value || [] : [];
+        var inventario = res[2].status === 'fulfilled' ? res[2].value || [] : [];
+
+        // KPIs
+        var pendientes = citas.filter(function(c) { return c.estado === 'Pendiente'; });
+        document.getElementById('stat-pacientes').textContent  = pacientes.length;
+        document.getElementById('stat-citas').textContent      = citas.length;
+        document.getElementById('stat-inventario').textContent = inventario.length;
+        document.getElementById('stat-pendientes').textContent = pendientes.length;
+
+        // Ultimas 5 citas ordenadas por fecha descendente
+        renderUltimasCitas(citas);
+
+        // Resumen por estado
+        renderCitasPorEstado(citas);
+    }
+
+    // Muestra las 5 citas mas recientes
+    function renderUltimasCitas(citas) {
+        var container = document.getElementById('ultimas-citas');
+
+        if (citas.length === 0) {
+            container.innerHTML =
+                '<p class="text-muted text-sm" style="padding:20px;text-align:center">' +
+                'No hay citas registradas.</p>';
+            return;
+        }
+
+        // Ordenar por fecha descendente y tomar las 5 primeras
+        var ultimas = citas.slice().sort(function(a, b) {
+            return new Date(b.fecha_hora) - new Date(a.fecha_hora);
+        }).slice(0, 5);
+
+        container.innerHTML = ultimas.map(function(c) {
+            var nombrePaciente = c.nombre_paciente ||
+                ('Paciente #' + c.PACIENTE_id_paciente);
+            var nombreMedico = c.nombre_medico ||
+                ('Medico #' + c.MEDICO_id_medico);
+
+            return '<div style="display:flex;align-items:center;justify-content:space-between;' +
+                'padding:11px 16px;border-top:1px solid #f3f4f6">' +
+                '<div style="display:flex;align-items:center;gap:10px">' +
+                    '<span class="pat-av" style="font-size:11px">' +
+                        nombrePaciente.slice(0, 2).toUpperCase() +
+                    '</span>' +
+                    '<div>' +
+                        '<p style="font-size:13px;font-weight:600;color:#111827">' +
+                            nombrePaciente +
+                        '</p>' +
+                        '<p class="text-sm text-muted">' +
+                            nombreMedico + ' &nbsp;·&nbsp; ' +
+                            formatDate(c.fecha_hora) +
+                        '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<span class="badge">' + (c.estado || 'Pendiente') + '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    // Muestra barras horizontales con el conteo por estado
+    function renderCitasPorEstado(citas) {
+        var container = document.getElementById('citas-por-estado');
+
+        if (citas.length === 0) {
+            container.innerHTML =
+                '<p class="text-muted text-sm" style="text-align:center;padding:20px">' +
+                'Sin datos.</p>';
+            return;
+        }
+
+        // Contar citas por estado
+        var conteo = {};
+        citas.forEach(function(c) {
+            var estado = c.estado || 'Pendiente';
+            conteo[estado] = (conteo[estado] || 0) + 1;
+        });
+
+        var total  = citas.length;
+        var estados = Object.keys(conteo);
+
+        container.innerHTML = estados.map(function(estado) {
+            var cantidad = conteo[estado];
+            var pct      = Math.round((cantidad / total) * 100);
+
+            return '<div class="bar-row" style="margin-bottom:14px">' +
+                '<span class="bar-label" style="width:100px">' + estado + '</span>' +
+                '<div class="bar-track" style="flex:1">' +
+                    '<div class="bar-fill" style="width:' + pct + '%"></div>' +
+                '</div>' +
+                '<span style="min-width:70px;text-align:right;font-size:12px;color:#6b7280">' +
+                    cantidad + ' (' + pct + '%)' +
+                '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    loadStats();
+</script>
+
+</body>
+</html>
