@@ -5,7 +5,7 @@ from fastapi import Depends
 
 from api.dependencies import get_usuario_actual, require_rol
 from app.modules.inventario import (
-    registrar_entrada, stock_critico,
+    editar_medicamento, registrar_entrada, stock_critico,
     historial_movimientos, listar_medicamentos,
 )
 
@@ -16,6 +16,15 @@ class EntradaBody(BaseModel):
     id_medicamento: int
     cantidad:       int
     motivo:         Optional[str] = "Reposición de stock"
+    
+
+# La clase que faltaba para poder editar
+class MedicamentoUpdate(BaseModel):
+    nombre_generico: str
+    nombre_comercial: Optional[str] = None
+    presentacion: Optional[str] = None
+    stock_actual: int
+    stock_minimo: int 
 
 
 # ---- GET /api/inventario ----
@@ -44,6 +53,19 @@ def ver_movimientos(
     return historial_movimientos(id_medicamento, limite)
 
 
+
+# ---- PUT /api/inventario/{id} ----
+@router.put("/{id_medicamento}")
+def actualizar_medicamento(id_medicamento: int, med: MedicamentoUpdate):
+    try:
+        exito = editar_medicamento(id_medicamento, med.dict())
+        if not exito:
+            raise HTTPException(status_code=404, detail="Medicamento no encontrado.")
+        return {"mensaje": "Medicamento actualizado correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
 # ---- POST /api/inventario/entrada ----
 @router.post("/entrada", status_code=status.HTTP_201_CREATED)
 def entrada_stock(

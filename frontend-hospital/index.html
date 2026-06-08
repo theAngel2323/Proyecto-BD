@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,23 +9,111 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        body { display:flex; min-height:100vh; background:#fff; }
-        .login-left { width:480px; flex-shrink:0; padding:52px; display:flex; flex-direction:column; justify-content:center; border-right:1px solid #f3f4f6; }
-        .login-right { flex:1; overflow:hidden; position:relative; }
-        .login-right img { width:100%; height:100%; object-fit:cover; display:block; }
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: #fff;
+        }
+
+        .login-left {
+            width: 480px;
+            flex-shrink: 0;
+            padding: 52px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid #f3f4f6;
+        }
+
+        .login-right {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .login-right img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         /* Capa oscura encima de la imagen para mejorar contraste */
-        .login-right-overlay { position:absolute; inset:0; background:rgba(30,58,110,0.45); }
-        .login-logo { display:flex; align-items:center; gap:10px; margin-bottom:40px; }
-        .login-logo-text span { display:block; font-size:15px; font-weight:700; color:#111827; line-height:1.2; }
-        .login-logo-text small { font-size:11px; color:#9ca3af; }
-        .login-left h1 { font-size:26px; font-weight:700; color:#111827; margin-bottom:6px; }
-        .login-left > p { font-size:13px; color:#6b7280; margin-bottom:28px; }
-        .demo-box { margin-top:24px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:12px 14px; }
-        .demo-box p { font-size:10.5px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
-        .demo-box span { font-size:12.5px; color:#374151; font-family:monospace; }
-        @media (max-width:900px) { .login-right { display:none; } .login-left { width:100%; border:none; } }
+        .login-right-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(30, 58, 110, 0.45);
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .login-logo-text span {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .login-logo-text small {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .login-left h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .login-left>p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 28px;
+        }
+
+        .demo-box {
+            margin-top: 24px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+
+        .demo-box p {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 6px;
+        }
+
+        .demo-box span {
+            font-size: 12.5px;
+            color: #374151;
+            font-family: monospace;
+        }
+
+        @media (max-width:900px) {
+            .login-right {
+                display: none;
+            }
+
+            .login-left {
+                width: 100%;
+                border: none;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div class="login-left">
@@ -41,25 +130,25 @@
 
         <div id="alert-box" class="hidden"></div>
 
-    
+
 
         <form id="login-form">
             <div class="form-group">
                 <label class="form-label">Usuario</label>
                 <div class="form-icon-wrap">
                     <i class="ti ti-id-badge form-icon"></i>
-                    <input id="username" type="text" class="form-input with-icon"
-                           placeholder="Ej. usr_admin" required autocomplete="username">
+                    <input id="username" type="text" class="form-input with-icon" placeholder="Ej. usr_admin" required
+                        autocomplete="username">
                 </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Contraseña</label>
                 <div class="form-icon-wrap">
                     <i class="ti ti-lock form-icon"></i>
-                    <input id="password" type="password" class="form-input with-icon"
-                           placeholder="........" required autocomplete="current-password">
+                    <input id="password" type="password" class="form-input with-icon" placeholder="........" required
+                        autocomplete="current-password">
                     <button type="button" id="toggle-pass"
-                            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;font-size:15px">
+                        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;font-size:15px">
                         <i class="ti ti-eye" id="eye-icon"></i>
                     </button>
                 </div>
@@ -67,7 +156,7 @@
 
             <!-- Boton Continuar para ingresar-->
             <button id="submit-btn" type="submit" class="btn-primary w-full"
-                    style="justify-content:center;padding:11px;font-size:14px;margin-top:6px">
+                style="justify-content:center;padding:11px;font-size:14px;margin-top:6px">
                 Continuar
             </button>
         </form>
@@ -82,7 +171,7 @@
     <div class="login-right">
         <!-- Imagen de hospital desde Unsplash, libre de derechos -->
         <img src="https://images.unsplash.com/photo-1600851555921-d280ba3f019a?q=80&w=1189&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-             alt="Hospital">
+            alt="Hospital">
         <div class="login-right-overlay"></div>
     </div>
 
@@ -90,9 +179,9 @@
     <script>
         if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
 
-        document.getElementById('toggle-pass').addEventListener('click', function() {
+        document.getElementById('toggle-pass').addEventListener('click', function () {
             var input = document.getElementById('password');
-            var icon  = document.getElementById('eye-icon');
+            var icon = document.getElementById('eye-icon');
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.className = 'ti ti-eye-off';
@@ -102,21 +191,51 @@
             }
         });
 
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
             e.preventDefault();
             hideAlert('alert-box');
             setLoading('submit-btn', true);
             var username = document.getElementById('username').value.trim();
             var password = document.getElementById('password').value;
+
             try {
                 var data = await API.login(username, password);
-                Auth.setSession(data.token, data.user || { username: username });
-                window.location.href = 'dashboard.html';
+
+                // 1. Guardamos la sesión y el rol
+                Auth.setSession(data.token, data);
+                if (data.id_rol) {
+                    localStorage.setItem('id_rol', data.id_rol);
+                }
+
+                // 2. REDIRECCIÓN DINÁMICA
+                try {
+                    // Consultamos los permisos exactos de este rol
+                    var res = await fetch(`http://127.0.0.1:8000/api/usuarios/roles/${data.id_rol}/modulos`);
+                    var permitidos = await res.json();
+
+                    if (permitidos && permitidos.length > 0) {
+                        // Si no tiene el dashboard, pero tiene 'pacientes', el sistema arma 'pacientes.html'
+                        var primeraPagina = permitidos[0];
+                        window.location.href = primeraPagina + '.html';
+                    } else {
+                        // Si el admin le quitó TODOS los permisos, lo rebotamos por seguridad
+                        Auth.clear();
+                        showAlert('alert-box', 'Tu rol no tiene acceso a ningún módulo. Contacta a un administrador.', 'warning');
+                        setLoading('submit-btn', false);
+                    }
+                } catch (errPermisos) {
+                    // Fallback en caso de que la red falle
+                    window.location.href = 'dashboard.html';
+                }
+
             } catch (err) {
                 showAlert('alert-box', err.message || 'Credenciales invalidas.', 'error');
                 setLoading('submit-btn', false);
             }
         });
+
+
     </script>
 </body>
+
 </html>

@@ -99,12 +99,12 @@ def _get_pool() -> pooling.MySQLConnectionPool:
         config = _build_config()
         _pool = pooling.MySQLConnectionPool(
             pool_name="hospitaldb_pool",
-            pool_size=int(os.getenv("DB_POOL_SIZE", 5)),
+            pool_size=int(os.getenv("DB_POOL_SIZE", 10)),
             **config,
         )
         logger.info(
             "Pool de conexiones inicializado (tamaño=%s) → %s:%s/%s",
-            os.getenv("DB_POOL_SIZE", 5),
+            os.getenv("DB_POOL_SIZE", 10),
             config["host"], config["port"], config["database"],
         )
     return _pool
@@ -179,4 +179,4 @@ if __name__ == "__main__":
     # Prueba rápida al ejecutar el módulo directamente
     logging.basicConfig(level=logging.DEBUG)
     ok = test_connection()
-    print("✅ Conexión OK" if ok else "❌ Conexión fallida")
+    print("Conexión OK" if ok else "Conexión fallida")

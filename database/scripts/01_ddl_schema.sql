@@ -50,6 +50,15 @@ CREATE TABLE rol (
     PRIMARY KEY (id_rol)
 );
 
+CREATE TABLE rol_modulo (
+    ROL_id_rol INT NOT NULL,
+    modulo VARCHAR(50) NOT NULL,
+    PRIMARY KEY (ROL_id_rol, modulo),
+    CONSTRAINT fk_rol_modulo_rol
+        FOREIGN KEY (ROL_id_rol)
+        REFERENCES rol (id_rol) ON DELETE CASCADE
+);
+
 -- ============================================================
 -- TABLAS CON DEPENDENCIAS DE PRIMER NIVEL
 -- ============================================================
@@ -83,7 +92,9 @@ CREATE TABLE enfermero (
 
 CREATE TABLE usuario_sistema (
     id_usuario              INT             NOT NULL AUTO_INCREMENT,
+    nombre_completo         VARCHAR(150)    NOT NULL,
     username                VARCHAR(50)     NOT NULL UNIQUE,
+    password_hash           VARCHAR(255)    NOT NULL,
     ultimo_acceso           DATETIME        NULL,
     intentos_fallidos       INT             NOT NULL DEFAULT 0,
     activo                  INT             NOT NULL DEFAULT 1,
@@ -115,20 +126,6 @@ CREATE TABLE usuario_rol (
         REFERENCES usuario_sistema (id_usuario)
 );
 
-CREATE TABLE privilegio (
-    id_privilegio       INT             NOT NULL AUTO_INCREMENT,
-    tabla               VARCHAR(100)    NOT NULL,
-    puede_select        INT             NOT NULL DEFAULT 0,
-    puede_update        INT             NOT NULL DEFAULT 0,
-    puede_insert        INT             NOT NULL DEFAULT 0,
-    puede_delete        INT             NOT NULL DEFAULT 0,
-    ROL_id_rol          INT             NOT NULL,
-    PRIMARY KEY (id_privilegio),
-    CONSTRAINT fk_privilegio_rol
-        FOREIGN KEY (ROL_id_rol)
-        REFERENCES rol (id_rol)
-);
-
 CREATE TABLE sesion (
     id_sesion                   INT             NOT NULL AUTO_INCREMENT,
     token_sesion                VARCHAR(100)    NOT NULL,
@@ -156,6 +153,17 @@ CREATE TABLE auditoria (
     CONSTRAINT fk_auditoria_usuario
         FOREIGN KEY (USUARIO_SISTEMA_id_usuario)
         REFERENCES usuario_sistema (id_usuario)
+);
+
+CREATE TABLE historial_etl (
+    id_carga INT AUTO_INCREMENT PRIMARY KEY,
+    fecha_carga DATETIME DEFAULT CURRENT_TIMESTAMP,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    destino VARCHAR(100) NOT NULL,
+    total_registros INT DEFAULT 0,
+    registros_exitosos INT DEFAULT 0,
+    registros_error INT DEFAULT 0,
+    estado VARCHAR(50) DEFAULT 'Completado'
 );
 
 -- ============================================================
@@ -253,7 +261,6 @@ CREATE TABLE inventario_movimiento (
         FOREIGN KEY (MEDICAMENTO_id_medicamento)
         REFERENCES medicamento (id_medicamento)
 );
-
 -- ============================================================
 -- FIN DEL SCRIPT
 -- ============================================================

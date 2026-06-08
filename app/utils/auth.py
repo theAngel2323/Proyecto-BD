@@ -26,7 +26,8 @@ def login(username: str, password: str, ip_origen: str = None) -> dict | None:
                 u.password_hash,
                 u.activo,
                 u.intentos_fallidos,
-                r.nombre_rol
+                r.nombre_rol,
+                ur.ROL_id_rol as id_rol
             FROM usuario_sistema u
             JOIN usuario_rol     ur ON ur.USUARIO_SISTEMA_id_usuario = u.id_usuario
             JOIN rol              r ON r.id_rol = ur.ROL_id_rol
@@ -111,6 +112,7 @@ def login(username: str, password: str, ip_origen: str = None) -> dict | None:
             "id_usuario": usuario["id_usuario"],
             "username":   usuario["username"],
             "rol":        usuario["nombre_rol"],
+            "id_rol":     usuario["id_rol"],
             "token":      token,
             "expiracion": expiracion.isoformat(),
         }
@@ -208,7 +210,8 @@ def sesion_activa(username: str) -> dict | None:
                 s.fecha_expiracion,
                 u.id_usuario,
                 u.username,
-                r.nombre_rol
+                r.nombre_rol,
+                ur.ROL_id_rol as id_rol  # <-- 1. AQUÍ PEDIMOS EL ID DEL ROL
             FROM sesion          s
             JOIN usuario_sistema u  ON u.id_usuario = s.USUARIO_SISTEMA_id_usuario
             JOIN usuario_rol     ur ON ur.USUARIO_SISTEMA_id_usuario = u.id_usuario
@@ -232,6 +235,7 @@ def sesion_activa(username: str) -> dict | None:
             "token":      sesion["token_sesion"],
             "username":   sesion["username"],
             "rol":        sesion["nombre_rol"],
+            "id_rol":     sesion["id_rol"],     
             "expiracion": sesion["fecha_expiracion"].isoformat(),
             "tiempo_restante": f"{minutos}m {segundos}s",
         }

@@ -73,6 +73,32 @@ def listar_medicamentos(solo_disponibles: bool = False) -> list:
             ORDER BY nombre_generico
         """)
         return cursor.fetchall()
+    
+    
+def editar_medicamento(id_medicamento: int, datos: dict) -> bool:
+    with db_cursor() as cursor:
+        cursor.execute("""
+            UPDATE medicamento
+            SET nombre_generico  = %s,
+                nombre_comercial = %s,
+                presentacion     = %s,
+                stock_actual     = %s,
+                stock_minimo     = %s
+            WHERE id_medicamento = %s
+        """, (
+            datos.get("nombre_generico"),
+            datos.get("nombre_comercial"),
+            datos.get("presentacion"),
+            datos.get("stock_actual"),
+            datos.get("stock_minimo"),
+            id_medicamento
+        ))
+        
+        if cursor.rowcount == 0:
+            # Podría ser que no exista o que los datos enviados sean exactamente iguales a los actuales
+            logger.info("Medicamento %s sin cambios o no encontrado.", id_medicamento)
+            
+        return True
 
 
 def _auditoria(cursor, id_usuario, accion, tabla, id_registro=None):
@@ -81,3 +107,6 @@ def _auditoria(cursor, id_usuario, accion, tabla, id_registro=None):
             (accion, tabla_afectada, id_registro, USUARIO_SISTEMA_id_usuario)
         VALUES (%s, %s, %s, %s)
     """, (accion, tabla, id_registro, id_usuario))
+    
+    
+    

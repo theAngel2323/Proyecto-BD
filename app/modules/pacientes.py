@@ -1,6 +1,5 @@
 import logging
 from config.database import db_cursor
-from app.utils.cifrado import guardar_dpi_cifrado
 
 logger = logging.getLogger(__name__)
 
@@ -14,18 +13,15 @@ def registrar_paciente(datos: dict, id_usuario: int) -> int:
             datos["nombre"],
             datos["apellido"],
             datos["fecha_nacimiento"],
-            datos.get("dpi_paciente"),
+            datos.get("dpi_paciente"), # Se guarda en texto plano (VARCHAR 13)
             datos.get("telefono"),
         ))
 
         id_paciente = cursor.lastrowid
-
-        # Cifrar DPI si fue proporcionado
-        if datos.get("dpi_paciente"):
-            guardar_dpi_cifrado(id_paciente, datos["dpi_paciente"])
-
+        
         _auditoria(cursor, id_usuario, "INSERT", "paciente", id_paciente)
         logger.info("Paciente registrado → id=%s", id_paciente)
+        
         return id_paciente
 
 
@@ -73,6 +69,7 @@ def obtener_paciente(id_paciente: int) -> dict | None:
 
         return cursor.fetchone()
 
+
 def editar_paciente(id_paciente: int, datos: dict, id_usuario: int) -> bool:
     with db_cursor() as cursor:
         # Guardar estado anterior para auditoría
@@ -90,14 +87,14 @@ def editar_paciente(id_paciente: int, datos: dict, id_usuario: int) -> bool:
             SET nombre           = %s,
                 apellido         = %s,
                 fecha_nacimiento = %s,
-                dpi_paciente = %s,
+                dpi_paciente     = %s,
                 telefono         = %s
             WHERE id_paciente = %s
         """, (
             datos["nombre"],
             datos["apellido"],
             datos["fecha_nacimiento"],
-            datos.get("dpi_paciente"),
+            datos.get("dpi_paciente"), # Actualizamos el DPI en texto plano
             datos.get("telefono"),
             id_paciente,
         ))
@@ -107,7 +104,9 @@ def editar_paciente(id_paciente: int, datos: dict, id_usuario: int) -> bool:
             datos_anteriores=str(anterior)
         )
         logger.info("Paciente actualizado → id=%s", id_paciente)
+        
         return True
+
 
 def desactivar_paciente(id_paciente: int, id_usuario: int) -> bool:
     with db_cursor() as cursor:
@@ -123,6 +122,7 @@ def desactivar_paciente(id_paciente: int, id_usuario: int) -> bool:
         _auditoria(cursor, id_usuario, "DELETE_LOGICO", "paciente", id_paciente)
         logger.info("Paciente desactivado → id=%s", id_paciente)
         return True
+
 
 def historial_paciente(id_paciente: int) -> dict:
     with db_cursor() as cursor:

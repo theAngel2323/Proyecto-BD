@@ -1,345 +1,430 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HospitalDB - Pacientes</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=2">
 </head>
+
 <body>
-<div class="app-wrapper">
-    <nav id="topnav" class="topnav"></nav>
-    <div class="body-wrap">
-        <aside id="sidebar" class="sidebar"></aside>
-        <main class="content">
+    <div class="app-wrapper">
+        <nav id="topnav" class="topnav"></nav>
+        <div class="body-wrap">
+            <aside id="sidebar" class="sidebar"></aside>
+            <main class="content">
 
-            <div class="page-header">
-                <div>
-                    <h1>Gestion de Pacientes</h1>
-                    <p>Administracion de expedientes clinicos.</p>
+                <div class="page-header">
+                    <div>
+                        <h1>Gestion de Pacientes</h1>
+                        <p>Administracion de expedientes clinicos.</p>
+                    </div>
+                    <div class="page-header-btns">
+                        <button class="btn-secondary" onclick="loadPacientes()">
+                            <i class="ti ti-refresh"></i>Actualizar
+                        </button>
+                        <button class="btn-primary" onclick="abrirModalNuevo()">
+                            <i class="ti ti-user-plus"></i>Nuevo Paciente
+                        </button>
+                    </div>
                 </div>
-                <div class="page-header-btns">
-                    <button class="btn-secondary" onclick="loadPacientes()">
-                        <i class="ti ti-refresh"></i>Actualizar
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-total">-</div>
+                        <div class="stat-card-label">Total Registrados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-activos">-</div>
+                        <div class="stat-card-label">Pacientes Activos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-inactivos">-</div>
+                        <div class="stat-card-label">Pacientes Inactivos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="stat-nuevos">-</div>
+                        <div class="stat-card-label">Registrados Este Mes</div>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <i class="ti ti-search" style="color:#9ca3af;font-size:15px"></i>
+                    <input id="search-input" type="text" class="filter-search-input"
+                        placeholder="Buscar por nombre, apellido o ID" oninput="renderTabla()">
+                    <div class="filter-divider"></div>
+                    <select id="filter-estado" class="filter-select" onchange="renderTabla()">
+                        <option value="">Estado: Todos</option>
+                        <option value="activo">Activos</option>
+                        <option value="inactivo">Inactivos</option>
+                    </select>
+                    <div class="filter-divider"></div>
+                    <button class="btn-secondary" style="padding:6px 12px;font-size:12.5px">
+                        <i class="ti ti-download" style="font-size:13px"></i>Exportar
                     </button>
-                    <button class="btn-primary" onclick="abrirModalNuevo()">
-                        <i class="ti ti-user-plus"></i>Nuevo Paciente
-                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>ID</th>
+                                    <th>Fecha Nacimiento</th>
+                                    <th>DPI</th>
+                                    <th>Telefono</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-body">
+                                <tr>
+                                    <td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">
+                                        <span class="spinner spinner-dark" style="margin-right:8px"></span>
+                                        Cargando pacientes...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <p id="tabla-info">-</p>
+                        <div class="pagination" id="pagination"></div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal crear/editar paciente -->
+    <div id="modal-paciente" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-titulo">Nuevo Paciente</h2>
+                <button class="modal-close" onclick="closeModal('modal-paciente')">x</button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-alert" class="hidden"></div>
+                <input type="hidden" id="edit-id">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Nombre *</label>
+                        <input id="f-nombre" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Apellido *</label>
+                        <input id="f-apellido" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Nacimiento *</label>
+                        <input id="f-nacimiento" type="date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">DPI</label>
+                        <input id="f-dpi" class="form-input" placeholder="####-#####-####">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telefono</label>
+                        <input id="f-telefono" class="form-input" placeholder="5555-1234">
+                    </div>
                 </div>
             </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-value" id="stat-total">-</div>
-                    <div class="stat-card-label">Total Registrados</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="stat-activos">-</div>
-                    <div class="stat-card-label">Pacientes Activos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="stat-inactivos">-</div>
-                    <div class="stat-card-label">Pacientes Inactivos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="stat-nuevos">-</div>
-                    <div class="stat-card-label">Registrados Este Mes</div>
-                </div>
-            </div>
-
-            <div class="filter-bar">
-                <i class="ti ti-search" style="color:#9ca3af;font-size:15px"></i>
-                <input id="search-input" type="text" class="filter-search-input"
-                       placeholder="Buscar por nombre, apellido o ID"
-                       oninput="renderTabla()">
-                <div class="filter-divider"></div>
-                <select id="filter-estado" class="filter-select" onchange="renderTabla()">
-                    <option value="">Estado: Todos</option>
-                    <option value="activo">Activos</option>
-                    <option value="inactivo">Inactivos</option>
-                </select>
-                <div class="filter-divider"></div>
-                <button class="btn-secondary" style="padding:6px 12px;font-size:12.5px">
-                    <i class="ti ti-download" style="font-size:13px"></i>Exportar
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-paciente')">Cancelar</button>
+                <button id="btn-guardar" class="btn-primary" onclick="guardarPaciente()">
+                    <i class="ti ti-device-floppy"></i>Guardar
                 </button>
             </div>
-
-            <div class="card">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Paciente</th>
-                                <th>ID</th>
-                                <th>Fecha Nacimiento</th>
-                                <th>DPI</th>
-                                <th>Telefono</th>
-                                <th>Fecha Registro</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-body">
-                            <tr>
-                                <td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">
-                                    <span class="spinner spinner-dark" style="margin-right:8px"></span>
-                                    Cargando pacientes...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-footer">
-                    <p id="tabla-info">-</p>
-                    <div class="pagination" id="pagination"></div>
-                </div>
-            </div>
-
-        </main>
-    </div>
-</div>
-
-<!-- Modal crear/editar paciente -->
-<div id="modal-paciente" class="modal-overlay hidden">
-    <div class="modal">
-        <div class="modal-header">
-            <h2 id="modal-titulo">Nuevo Paciente</h2>
-            <button class="modal-close" onclick="closeModal('modal-paciente')">x</button>
         </div>
-        <div class="modal-body">
-            <div id="modal-alert" class="hidden"></div>
-            <input type="hidden" id="edit-id">
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label class="form-label">Nombre *</label>
-                    <input id="f-nombre" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Apellido *</label>
-                    <input id="f-apellido" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Fecha de Nacimiento *</label>
-                    <input id="f-nacimiento" type="date" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">DPI</label>
-                    <input id="f-dpi" class="form-input" placeholder="####-#####-####">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Telefono</label>
-                    <input id="f-telefono" class="form-input" placeholder="5555-1234">
-                </div>
+    </div>
+
+    <!-- Modal de confirmacion para eliminar -->
+    <div id="modal-confirmar" class="modal-overlay hidden">
+        <div class="modal" style="max-width:420px">
+            <div class="modal-header">
+                <h2>Confirmar accion</h2>
+                <button class="modal-close" onclick="closeModal('modal-confirmar')">x</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="confirm-id">
+                <p id="confirm-msg" style="font-size:14px;color:#374151;line-height:1.6"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-confirmar')">Cancelar</button>
+                <button class="btn-primary" onclick="ejecutarEliminar()">
+                    <i class="ti ti-check"></i>Confirmar
+                </button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeModal('modal-paciente')">Cancelar</button>
-            <button id="btn-guardar" class="btn-primary" onclick="guardarPaciente()">
-                <i class="ti ti-device-floppy"></i>Guardar
-            </button>
-        </div>
     </div>
-</div>
 
-<!-- Modal de confirmacion para eliminar -->
-<div id="modal-confirmar" class="modal-overlay hidden">
-    <div class="modal" style="max-width:420px">
-        <div class="modal-header">
-            <h2>Confirmar accion</h2>
-            <button class="modal-close" onclick="closeModal('modal-confirmar')">x</button>
-        </div>
-        <div class="modal-body">
-            <input type="hidden" id="confirm-id">
-            <p id="confirm-msg" style="font-size:14px;color:#374151;line-height:1.6"></p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeModal('modal-confirmar')">Cancelar</button>
-            <button class="btn-primary" onclick="ejecutarEliminar()">
-                <i class="ti ti-check"></i>Confirmar
-            </button>
-        </div>
-    </div>
-</div>
+    <script src="js/app.js?v=2"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        Auth.requireLogin();
+        renderLayout('pacientes.html');
 
-<script src="js/app.js"></script>
-<script src="js/layout.js"></script>
-<script>
-    Auth.requireLogin();
-    renderLayout('pacientes.html');
+        var todos = [];
+        var paginaActual = 1;
+        var POR_PAGINA = 10;
 
-    var todos        = [];
-    var paginaActual = 1;
-    var POR_PAGINA   = 10;
+        function getIniciales(nombre, apellido) {
+            return (nombre ? nombre[0] : '?') + (apellido ? apellido[0] : '');
+        }
 
-    function getIniciales(nombre, apellido) {
-        return (nombre ? nombre[0] : '?') + (apellido ? apellido[0] : '');
-    }
-
-    async function loadPacientes() {
-        document.getElementById('tabla-body').innerHTML =
-            '<tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">' +
-            '<span class="spinner spinner-dark" style="margin-right:8px"></span>Cargando...</td></tr>';
-        try {
-            todos = await API.getPacientes() || [];
-        } catch (err) {
+        async function loadPacientes() {
             document.getElementById('tabla-body').innerHTML =
                 '<tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">' +
-                'Error al conectar con el servidor.</td></tr>';
-            return;
+                '<span class="spinner spinner-dark" style="margin-right:8px"></span>Cargando...</td></tr>';
+            try {
+                todos = await API.getPacientes() || [];
+            } catch (err) {
+                document.getElementById('tabla-body').innerHTML =
+                    '<tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">' +
+                    'Error al conectar con el servidor.</td></tr>';
+                return;
+            }
+
+            var mesActual = new Date().getMonth();
+            var anioActual = new Date().getFullYear();
+            var nuevos = todos.filter(function (p) {
+                if (!p.fecha_registro) return false;
+                var f = new Date(p.fecha_registro);
+                return f.getMonth() === mesActual && f.getFullYear() === anioActual;
+            }).length;
+
+            document.getElementById('stat-total').textContent = todos.length;
+            document.getElementById('stat-activos').textContent = todos.filter(function (p) { return p.activo !== 0 && p.activo !== false; }).length;
+            document.getElementById('stat-inactivos').textContent = todos.filter(function (p) { return p.activo === 0 || p.activo === false; }).length;
+            document.getElementById('stat-nuevos').textContent = nuevos;
+
+            renderTabla();
         }
 
-        var mesActual  = new Date().getMonth();
-        var anioActual = new Date().getFullYear();
-        var nuevos = todos.filter(function(p) {
-            if (!p.fecha_registro) return false;
-            var f = new Date(p.fecha_registro);
-            return f.getMonth() === mesActual && f.getFullYear() === anioActual;
-        }).length;
+        function renderTabla() {
+            var busqueda = document.getElementById('search-input').value.toLowerCase();
+            var estado = document.getElementById('filter-estado').value;
 
-        document.getElementById('stat-total').textContent    = todos.length;
-        document.getElementById('stat-activos').textContent  = todos.filter(function(p){ return p.activo !== 0 && p.activo !== false; }).length;
-        document.getElementById('stat-inactivos').textContent= todos.filter(function(p){ return p.activo === 0 || p.activo === false; }).length;
-        document.getElementById('stat-nuevos').textContent   = nuevos;
+            var filtrados = todos.filter(function (p) {
+                var texto = (p.nombre + ' ' + p.apellido + ' ' + p.id_paciente).toLowerCase();
+                var coincideBusqueda = texto.includes(busqueda);
+                var coincideEstado = !estado ||
+                    (estado === 'activo' && p.activo !== 0 && p.activo !== false) ||
+                    (estado === 'inactivo' && (p.activo === 0 || p.activo === false));
+                return coincideBusqueda && coincideEstado;
+            });
 
-        renderTabla();
-    }
+            var total = filtrados.length;
+            var paginas = Math.ceil(total / POR_PAGINA) || 1;
+            if (paginaActual > paginas) paginaActual = 1;
 
-    function renderTabla() {
-        var busqueda = document.getElementById('search-input').value.toLowerCase();
-        var estado   = document.getElementById('filter-estado').value;
+            var inicio = (paginaActual - 1) * POR_PAGINA;
+            var porMostrar = filtrados.slice(inicio, inicio + POR_PAGINA);
+            var tbody = document.getElementById('tabla-body');
 
-        var filtrados = todos.filter(function(p) {
-            var texto = (p.nombre + ' ' + p.apellido + ' ' + p.id_paciente).toLowerCase();
-            var coincideBusqueda = texto.includes(busqueda);
-            var coincideEstado = !estado ||
-                (estado === 'activo'   && p.activo !== 0 && p.activo !== false) ||
-                (estado === 'inactivo' && (p.activo === 0 || p.activo === false));
-            return coincideBusqueda && coincideEstado;
-        });
-
-        var total   = filtrados.length;
-        var paginas = Math.ceil(total / POR_PAGINA) || 1;
-        if (paginaActual > paginas) paginaActual = 1;
-
-        var inicio     = (paginaActual - 1) * POR_PAGINA;
-        var porMostrar = filtrados.slice(inicio, inicio + POR_PAGINA);
-        var tbody      = document.getElementById('tabla-body');
-
-        if (porMostrar.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">No se encontraron pacientes.</td></tr>';
-        } else {
-            tbody.innerHTML = porMostrar.map(function(p) {
-                var iniciales = getIniciales(p.nombre, p.apellido);
-                var activo    = p.activo !== 0 && p.activo !== false;
-                return '<tr>' +
-                    '<td><div style="display:flex;align-items:center;gap:10px">' +
+            if (porMostrar.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">No se encontraron pacientes.</td></tr>';
+            } else {
+                tbody.innerHTML = porMostrar.map(function (p) {
+                    var iniciales = getIniciales(p.nombre, p.apellido);
+                    var activo = p.activo !== 0 && p.activo !== false;
+                    return '<tr>' +
+                        '<td><div style="display:flex;align-items:center;gap:10px">' +
                         '<span class="pat-av">' + iniciales + '</span>' +
                         '<p style="font-weight:600;color:#111827;font-size:13px">' + p.nombre + ' ' + p.apellido + '</p>' +
-                    '</div></td>' +
-                    '<td class="font-mono text-muted text-sm">#' + p.id_paciente + '</td>' +
-                    '<td>' + (p.fecha_nacimiento ? formatDate(p.fecha_nacimiento) : '-') + '</td>' +
-                    '<td class="font-mono text-sm">' + (p.dpi_paciente || '-') + '</td>' +
-                    '<td class="text-muted">' + (p.telefono || '-') + '</td>' +
-                    '<td class="text-muted text-sm">' + (p.fecha_registro ? formatDate(p.fecha_registro) : '-') + '</td>' +
-                    '<td><span class="badge">' + (activo ? 'Activo' : 'Inactivo') + '</span></td>' +
-                    '<td>' +
+                        '</div></td>' +
+                        '<td class="font-mono text-muted text-sm">#' + p.id_paciente + '</td>' +
+                        '<td>' + (p.fecha_nacimiento ? formatDate(p.fecha_nacimiento) : '-') + '</td>' +
+                        '<td class="font-mono text-sm">' + (p.dpi_paciente || '-') + '</td>' +
+                        '<td class="text-muted">' + (p.telefono || '-') + '</td>' +
+                        '<td class="text-muted text-sm">' + (p.fecha_registro ? formatDate(p.fecha_registro) : '-') + '</td>' +
+                        '<td><span class="badge">' + (activo ? 'Activo' : 'Inactivo') + '</span></td>' +
+                        '<td>' +
                         '<button class="action-btn" title="Editar" onclick="abrirModalEditar(' + p.id_paciente + ')"><i class="ti ti-edit"></i></button>' +
                         '<button class="action-btn" title="Desactivar" onclick="eliminarPaciente(' + p.id_paciente + ')"><i class="ti ti-trash"></i></button>' +
-                    '</td>' +
-                '</tr>';
-            }).join('');
+                        '</td>' +
+                        '</tr>';
+                }).join('');
+            }
+
+            var fin = Math.min(paginaActual * POR_PAGINA, total);
+            document.getElementById('tabla-info').textContent =
+                'Mostrando ' + (total ? inicio + 1 : 0) + ' - ' + fin + ' de ' + total + ' registros';
+
+            var pgEl = document.getElementById('pagination');
+            pgEl.innerHTML = '';
+            for (var i = 1; i <= Math.min(paginas, 7); i++) {
+                var btn = document.createElement('button');
+                btn.className = 'page-btn' + (i === paginaActual ? ' active' : '');
+                btn.textContent = i;
+                btn.dataset.pagina = i;
+                btn.onclick = function () { paginaActual = parseInt(this.dataset.pagina); renderTabla(); };
+                pgEl.appendChild(btn);
+            }
         }
 
-        var fin = Math.min(paginaActual * POR_PAGINA, total);
-        document.getElementById('tabla-info').textContent =
-            'Mostrando ' + (total ? inicio + 1 : 0) + ' - ' + fin + ' de ' + total + ' registros';
-
-        var pgEl = document.getElementById('pagination');
-        pgEl.innerHTML = '';
-        for (var i = 1; i <= Math.min(paginas, 7); i++) {
-            var btn = document.createElement('button');
-            btn.className = 'page-btn' + (i === paginaActual ? ' active' : '');
-            btn.textContent = i;
-            btn.dataset.pagina = i;
-            btn.onclick = function() { paginaActual = parseInt(this.dataset.pagina); renderTabla(); };
-            pgEl.appendChild(btn);
+        function abrirModalNuevo() {
+            document.getElementById('modal-titulo').textContent = 'Nuevo Paciente';
+            document.getElementById('edit-id').value = '';
+            document.getElementById('f-nombre').value = '';
+            document.getElementById('f-apellido').value = '';
+            document.getElementById('f-nacimiento').value = '';
+            document.getElementById('f-dpi').value = '';
+            document.getElementById('f-telefono').value = '';
+            hideAlert('modal-alert');
+            openModal('modal-paciente');
         }
-    }
 
-    function abrirModalNuevo() {
-        document.getElementById('modal-titulo').textContent  = 'Nuevo Paciente';
-        document.getElementById('edit-id').value             = '';
-        document.getElementById('f-nombre').value            = '';
-        document.getElementById('f-apellido').value          = '';
-        document.getElementById('f-nacimiento').value        = '';
-        document.getElementById('f-dpi').value               = '';
-        document.getElementById('f-telefono').value          = '';
-        hideAlert('modal-alert');
-        openModal('modal-paciente');
-    }
+        function abrirModalEditar(id) {
+            var p = todos.find(function (x) { return x.id_paciente === id; });
+            if (!p) return;
+            document.getElementById('modal-titulo').textContent = 'Editar Paciente';
+            document.getElementById('edit-id').value = id;
+            document.getElementById('f-nombre').value = p.nombre || '';
+            document.getElementById('f-apellido').value = p.apellido || '';
+            document.getElementById('f-nacimiento').value = p.fecha_nacimiento ? p.fecha_nacimiento.split('T')[0] : '';
+            document.getElementById('f-dpi').value = p.dpi_paciente || '';
+            document.getElementById('f-telefono').value = p.telefono || '';
+            hideAlert('modal-alert');
+            openModal('modal-paciente');
+        }
+        async function guardarPaciente() {
+            hideAlert('modal-alert');
+            var id = document.getElementById('edit-id').value;
+            var data = {
+                nombre: document.getElementById('f-nombre').value.trim(),
+                apellido: document.getElementById('f-apellido').value.trim(),
+                fecha_nacimiento: document.getElementById('f-nacimiento').value,
+                dpi_paciente: document.getElementById('f-dpi').value.trim(),
+                telefono: document.getElementById('f-telefono').value.trim()
+            };
 
-    function abrirModalEditar(id) {
-        var p = todos.find(function(x) { return x.id_paciente === id; });
-        if (!p) return;
-        document.getElementById('modal-titulo').textContent  = 'Editar Paciente';
-        document.getElementById('edit-id').value             = id;
-        document.getElementById('f-nombre').value            = p.nombre || '';
-        document.getElementById('f-apellido').value          = p.apellido || '';
-        document.getElementById('f-nacimiento').value        = p.fecha_nacimiento ? p.fecha_nacimiento.split('T')[0] : '';
-        document.getElementById('f-dpi').value               = p.dpi_paciente || '';
-        document.getElementById('f-telefono').value          = p.telefono || '';
-        hideAlert('modal-alert');
-        openModal('modal-paciente');
-    }
+            if (!data.nombre || !data.apellido || !data.fecha_nacimiento) {
+                showAlert('modal-alert', 'Nombre, apellido y fecha de nacimiento son obligatorios.', 'error');
+                return;
+            }
 
-    async function guardarPaciente() {
-        hideAlert('modal-alert');
-        var id   = document.getElementById('edit-id').value;
-        var data = {
-            nombre:           document.getElementById('f-nombre').value.trim(),
-            apellido:         document.getElementById('f-apellido').value.trim(),
-            fecha_nacimiento: document.getElementById('f-nacimiento').value,
-            dpi_paciente:     document.getElementById('f-dpi').value.trim(),
-            telefono:         document.getElementById('f-telefono').value.trim()
+            setLoading('btn-guardar', true);
+
+            try {
+                if (id) {
+                    await API.editarPaciente(id, data);
+                    showToast('Paciente actualizado correctamente', 'info');
+                } else {
+                    await API.crearPaciente(data);
+                    showToast('Paciente registrado con éxito', 'success');
+                }
+                closeModal('modal-paciente');
+                loadPacientes();
+            } catch (err) {
+                showAlert('modal-alert', err.message, 'error');
+            } finally {
+                setLoading('btn-guardar', false);
+            }
+        }
+
+        function eliminarPaciente(id) {
+            document.getElementById('confirm-id').value = id;
+            document.getElementById('confirm-msg').textContent =
+                '¿Desea desactivar el usuario del sistema? ';
+            openModal('modal-confirmar');
+        }
+
+        async function ejecutarEliminar() {
+            var id = document.getElementById('confirm-id').value;
+            closeModal('modal-confirmar');
+
+            try {
+                await API.eliminarPaciente(id);
+                showToast('Paciente desactivado del sistema', 'success');
+                loadPacientes();
+            } catch (err) {
+                showToast('Error al desactivar: ' + err.message, 'error');
+            }
+        }
+
+        loadPacientes();
+    </script>
+
+<style>
+        #toast-container {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            z-index: 999999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        .toast-msg {
+            min-width: 250px !important;
+            padding: 12px 20px !important;
+            border-radius: 6px !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #111827 !important;
+            transform: translateX(120%) !important;
+            opacity: 0 !important;
+            transition: all 0.4s ease-out !important;
+            border-left: 5px solid #10b981 !important; /* Verde por defecto */
+        }
+        .toast-msg.show {
+            transform: translateX(0) !important;
+            opacity: 1 !important;
+        }
+        .toast-error { border-left-color: #ef4444 !important; }
+        .toast-info { border-left-color: #3b82f6 !important; }
+    </style>
+
+    <script>
+        // Sobrescribimos cualquier otra función guardada en caché
+        window.showToast = function(mensaje, tipo = 'success') {
+            console.log("¡Ejecutando showToast nuclear!", mensaje); // Para ver en consola
+            
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                document.body.appendChild(container);
+            }
+
+            var icon = 'ti-circle-check';
+            var iconColor = '#10b981';
+            
+            if (tipo === 'error') { icon = 'ti-alert-circle'; iconColor = '#ef4444'; }
+            if (tipo === 'info') { icon = 'ti-info-circle'; iconColor = '#3b82f6'; }
+
+            var toast = document.createElement('div');
+            toast.className = 'toast-msg toast-' + tipo;
+            toast.innerHTML = '<i class="ti ' + icon + '" style="font-size: 22px; color: ' + iconColor + '"></i><span>' + mensaje + '</span>';
+            
+            container.appendChild(toast);
+
+            // Forzar un pequeño reflow antes de animar
+            void toast.offsetWidth; 
+
+            toast.classList.add('show');
+
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 400);
+            }, 3000);
         };
-        if (!data.nombre || !data.apellido || !data.fecha_nacimiento) {
-            showAlert('modal-alert', 'Nombre, apellido y fecha de nacimiento son obligatorios.', 'error');
-            return;
-        }
-        setLoading('btn-guardar', true);
-        try {
-            if (id) { await API.editarPaciente(id, data); }
-            else    { await API.crearPaciente(data); }
-            closeModal('modal-paciente');
-            loadPacientes();
-        } catch (err) {
-            showAlert('modal-alert', err.message, 'error');
-        } finally {
-            setLoading('btn-guardar', false);
-        }
-    }
+    </script>
 
-    function eliminarPaciente(id) {
-        document.getElementById('confirm-id').value = id;
-        document.getElementById('confirm-msg').textContent =
-            '¿Desea desactivar el usuario del sistema? ';
-        openModal('modal-confirmar');
-    }
 
-    async function ejecutarEliminar() {
-        var id = document.getElementById('confirm-id').value;
-        closeModal('modal-confirmar');
-        try {
-            await API.eliminarPaciente(id);
-            loadPacientes();
-        } catch (err) {
-            alert('Error: ' + err.message);
-        }
-    }
 
-    loadPacientes();
-</script>
 </body>
+
 </html>

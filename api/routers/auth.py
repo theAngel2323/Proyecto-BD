@@ -35,7 +35,7 @@ def endpoint_login(body: LoginRequest, request: Request):
                 "mensaje": f"Ya tienes una sesión activa. Tiempo restante: {activa['tiempo_restante']}.",
                 "token":        activa["token"],
                 "username":     activa["username"],
-                "rol":          activa["rol"],
+                "id_rol":          activa["id_rol"],
                 "expiracion":   activa["expiracion"],
                 "tiempo_restante": activa["tiempo_restante"],
             }

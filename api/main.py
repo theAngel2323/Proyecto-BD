@@ -4,7 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from config.logging_config import setup_logging
 from config.database import test_connection
 
-from api.routers import auth, pacientes, citas, prescripciones, ingresos, inventario
+
+
+from api.routers import auth, pacientes, citas, prescripciones, ingresos, inventario, usuarios, etl
 
 # Inicializar logging
 setup_logging()
@@ -32,6 +34,8 @@ app.include_router(citas.router,          prefix="/api/citas",          tags=["C
 app.include_router(prescripciones.router, prefix="/api/prescripciones", tags=["Prescripciones"])
 app.include_router(ingresos.router,       prefix="/api/ingresos",       tags=["Ingresos"])
 app.include_router(inventario.router,     prefix="/api/inventario",     tags=["Inventario"])
+app.include_router(usuarios.router, prefix="/api/usuarios", tags=["Usuarios"])
+app.include_router(etl.router, prefix="/api/etl", tags=["ETL"])
 
 
 

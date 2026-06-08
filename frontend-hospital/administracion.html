@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,308 +9,620 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-<div class="app-wrapper">
+    <div class="app-wrapper">
 
-    <nav id="topnav" class="topnav"></nav>
+        <nav id="topnav" class="topnav"></nav>
 
-    <div class="body-wrap">
-        <aside id="sidebar" class="sidebar"></aside>
+        <div class="body-wrap">
+            <aside id="sidebar" class="sidebar"></aside>
 
-        <main class="content">
+            <main class="content">
 
-            <!-- Aviso de datos estaticos -->
-            <div class="alert alert-warning" style="margin-bottom:16px">
-                <i class="ti ti-info-circle"></i>
-                <span>
-                    Este modulo muestra datos estáticos. 
-                </span>
-            </div>
-
-            <!-- Encabezado -->
-            <div class="page-header">
-                <div>
-                    <h1>Administracion de Usuarios y Roles</h1>
-                    <p>Configura y audita el acceso del personal al sistema.</p>
+                <div class="page-header">
+                    <div>
+                        <h1>Administracion de Usuarios y Roles</h1>
+                        <p>Configura y audita el acceso del personal al sistema.</p>
+                    </div>
+                    <div class="page-header-btns">
+                        <button class="btn-secondary" onclick="loadAuditoria(1)">
+                            <i class="ti ti-refresh"></i>Actualizar Logs
+                        </button>
+                        <button class="btn-primary" onclick="openModal('modal-usuario')">
+                            <i class="ti ti-user-plus"></i>Nuevo Usuario
+                        </button>
+                    </div>
                 </div>
-                <div class="page-header-btns">
-                    <button class="btn-secondary">
-                        <i class="ti ti-download"></i>Exportar Logs
-                    </button>
-                    <button class="btn-primary" onclick="openModal('modal-usuario')">
-                        <i class="ti ti-user-plus"></i>Nuevo Usuario
-                    </button>
+
+                <div id="modal-editar-usuario" class="modal-overlay hidden">
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h2>Editar Usuario</h2>
+                            <button class="modal-close" onclick="closeModal('modal-editar-usuario')">x</button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="e-id-usuario">
+                            <div class="form-grid-2">
+                                <div class="form-group" style="grid-column:1/-1">
+                                    <label class="form-label">Nombre completo</label>
+                                    <input id="e-nombre" class="form-input" disabled
+                                        style="background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed;">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Usuario</label>
+                                    <input id="e-usuario" class="form-input" disabled
+                                        style="background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed;">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Rol *</label>
+                                    <select id="e-rol" class="form-input"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Estado *</label>
+                                    <select id="e-estado" class="form-input">
+                                        <option value="1">Activo</option>
+                                        <option value="0">Suspendido</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-secondary" onclick="closeModal('modal-editar-usuario')">Cancelar</button>
+                            <button id="btn-actualizar-user" class="btn-primary" onclick="guardarEdicionUsuario()">
+                                <i class="ti ti-device-floppy"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="grid-2">
+                <div class="grid-2" style="margin-bottom: 24px;">
 
-                <!-- Tabla de usuarios del sistema -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Gestion de Usuarios</h3>
+                            <div
+                                style="display:flex;align-items:center;gap:7px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 10px">
+                                <i class="ti ti-search" style="font-size:13px;color:#9ca3af"></i>
+                                <input placeholder="Buscar usuario..."
+                                    style="border:none;background:transparent;font-size:12.5px;outline:none;width:120px">
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Nombre</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th style="text-align: right; width: 80px;">ACCIONES</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-usuarios">
+                                    <tr>
+                                        <td colspan="4" style="text-align:center;padding:40px;color:#9ca3af">
+                                            <span class="spinner spinner-dark"></span> Cargando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding:18px">
+                        <p style="font-size:14px;font-weight:600;color:#111827;margin-bottom:14px">Roles y Permisos</p>
+                        <div id="lista-roles" style="display:flex;flex-direction:column;gap:8px">
+                            <div style="text-align:center;padding:20px;"><span class="spinner spinner-dark"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
                 <div class="card">
-                    <div class="card-header">
-                        <h3>Gestion de Usuarios</h3>
-                        <div style="display:flex;align-items:center;gap:7px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 10px">
-                            <i class="ti ti-search" style="font-size:13px;color:#9ca3af"></i>
-                            <input placeholder="Buscar usuario..."
-                                   style="border:none;background:transparent;font-size:12.5px;outline:none;width:120px">
+                    <div class="card-header"
+                        style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; justify-content:space-between">
+                        <h3>Auditoria de Acceso</h3>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+                            <div
+                                style="display:flex;align-items:center;gap:7px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px">
+                                <i class="ti ti-search" style="font-size:14px;color:#9ca3af"></i>
+                                <input id="audit-search" placeholder="Usuario..."
+                                    style="border:none;background:transparent;font-size:13px;outline:none;width:100px"
+                                    onkeyup="if(event.key === 'Enter') loadAuditoria(1)">
+                            </div>
+                            <input type="date" id="audit-fecha-inicio"
+                                style="padding:6px 10px; border:1px solid #e5e7eb; border-radius:6px; font-size:13px; outline:none; color:#374151"
+                                onchange="loadAuditoria(1)">
+                            <span style="color:#9ca3af; font-size:13px">a</span>
+                            <input type="date" id="audit-fecha-fin"
+                                style="padding:6px 10px; border:1px solid #e5e7eb; border-radius:6px; font-size:13px; outline:none; color:#374151"
+                                onchange="loadAuditoria(1)">
+
+                            <button class="btn-secondary" style="padding:6px 12px; height:34px"
+                                onclick="loadAuditoria(1)">
+                                <i class="ti ti-filter"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>Rol</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th>Usuario</th>
+                                    <th>Acción y Tabla</th>
+                                    <th>Fecha y Hora</th>
+                                    <th>IP Address</th>
+                                    <th>Resultado</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tabla-auditoria">
                                 <tr>
-                                    <td>
-                                        <div style="display:flex;align-items:center;gap:9px">
-                                            <span class="pat-av">JO</span>
-                                            <p style="font-weight:600;font-size:13px;color:#111827">Dr. Julian Ortega</p>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-sm">j.ortega@hospital.com</td>
-                                    <td class="text-sm">Doctor / Especialista</td>
-                                    <td><span class="badge">Activo</span></td>
-                                    <td>
-                                        <button class="action-btn" title="Editar"><i class="ti ti-edit"></i></button>
-                                        <button class="action-btn" title="Suspender"><i class="ti ti-ban"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div style="display:flex;align-items:center;gap:9px">
-                                            <span class="pat-av">MR</span>
-                                            <p style="font-weight:600;font-size:13px;color:#111827">Lic. Marta Rivas</p>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-sm">m.rivas@hospital.com</td>
-                                    <td class="text-sm"> Enfermera / Jefa de Piso</td>
-                                    <td><span class="badge">Activo</span></td>
-                                    <td>
-                                        <button class="action-btn" title="Editar"><i class="ti ti-edit"></i></button>
-                                        <button class="action-btn" title="Suspender"><i class="ti ti-ban"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div style="display:flex;align-items:center;gap:9px">
-                                            <span class="pat-av">CM</span>
-                                            <p style="font-weight:600;font-size:13px;color:#111827">Carlos Mendoza</p>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-sm">c.mendoza@hospital.com</td>
-                                    <td class="text-sm">Administrador</td>
-                                    <td><span class="badge">Activo</span></td>
-                                    <td>
-                                        <button class="action-btn" title="Editar"><i class="ti ti-edit"></i></button>
-                                        <button class="action-btn" title="Suspender"><i class="ti ti-ban"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div style="display:flex;align-items:center;gap:9px">
-                                            <span class="pat-av">SG</span>
-                                            <p style="font-weight:600;font-size:13px;color:#111827">Sofia Galan</p>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-sm">s.galan@hospital.com</td>
-                                    <td class="text-sm">Recepcionista</td>
-                                    <td><span class="badge">Suspendido</span></td>
-                                    <td>
-                                        <button class="action-btn" title="Editar"><i class="ti ti-edit"></i></button>
-                                        <button class="action-btn" title="Suspender"><i class="ti ti-ban"></i></button>
-                                    </td>
+                                    <td colspan="5" style="text-align:center;padding:40px;"><span
+                                            class="spinner spinner-dark"></span> Cargando...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <!-- Lista de roles disponibles -->
-                <div class="card" style="padding:18px">
-                    <p style="font-size:14px;font-weight:600;color:#111827;margin-bottom:14px">Roles y Permisos</p>
-                    <div style="display:flex;flex-direction:column;gap:8px">
-
-                        <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;width:100%;transition:border-color 0.15s"
-                                onmouseover="this.style.borderColor='#1e3a6e'"
-                                onmouseout="this.style.borderColor='#e5e7eb'">
-                            <div style="display:flex;align-items:center;gap:10px">
-                                <div style="width:34px;height:34px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center">
-                                    <i class="ti ti-shield" style="font-size:16px;color:#374151"></i>
-                                </div>
-                                <div style="text-align:left">
-                                    <p style="font-size:13px;font-weight:600;color:#111827">Administrador</p>
-                                    <p class="text-sm text-muted">Acceso total al sistema</p>
-                                </div>
-                            </div>
-                            <i class="ti ti-chevron-right" style="color:#9ca3af"></i>
-                        </button>
-
-                        <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;width:100%;transition:border-color 0.15s"
-                                onmouseover="this.style.borderColor='#1e3a6e'"
-                                onmouseout="this.style.borderColor='#e5e7eb'">
-                            <div style="display:flex;align-items:center;gap:10px">
-                                <div style="width:34px;height:34px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center">
-                                    <i class="ti ti-stethoscope" style="font-size:16px;color:#374151"></i>
-                                </div>
-                                <div style="text-align:left">
-                                    <p style="font-size:13px;font-weight:600;color:#111827">Doctor</p>
-                                    <p class="text-sm text-muted">Gestion de historiales clinicos</p>
-                                </div>
-                            </div>
-                            <i class="ti ti-chevron-right" style="color:#9ca3af"></i>
-                        </button>
-
-                        <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;width:100%;transition:border-color 0.15s"
-                                onmouseover="this.style.borderColor='#1e3a6e'"
-                                onmouseout="this.style.borderColor='#e5e7eb'">
-                            <div style="display:flex;align-items:center;gap:10px">
-                                <div style="width:34px;height:34px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center">
-                                    <i class="ti ti-heart-rate-monitor" style="font-size:16px;color:#374151"></i>
-                                </div>
-                                <div style="text-align:left">
-                                    <p style="font-size:13px;font-weight:600;color:#111827">Enfermero</p>
-                                    <p class="text-sm text-muted">Monitoreo y administracion</p>
-                                </div>
-                            </div>
-                            <i class="ti ti-chevron-right" style="color:#9ca3af"></i>
-                        </button>
-
-                        <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;width:100%;transition:border-color 0.15s"
-                                onmouseover="this.style.borderColor='#1e3a6e'"
-                                onmouseout="this.style.borderColor='#e5e7eb'">
-                            <div style="display:flex;align-items:center;gap:10px">
-                                <div style="width:34px;height:34px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center">
-                                    <i class="ti ti-calendar" style="font-size:16px;color:#374151"></i>
-                                </div>
-                                <div style="text-align:left">
-                                    <p style="font-size:13px;font-weight:600;color:#111827">Recepcionista</p>
-                                    <p class="text-sm text-muted">Agenda y facturacion basica</p>
-                                </div>
-                            </div>
-                            <i class="ti ti-chevron-right" style="color:#9ca3af"></i>
-                        </button>
-
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-top:1px solid #e5e7eb; background:#f9fafb; border-radius:0 0 8px 8px;">
+                        <span id="audit-info" style="font-size:13px; color:#6b7280; font-weight:500">Mostrando 0
+                            registros</span>
+                        <div style="display:flex; gap:8px">
+                            <button id="btn-prev-audit" class="btn-secondary" style="padding:5px 12px; font-size:13px"
+                                onclick="changeAuditPage(-1)">Anterior</button>
+                            <button id="btn-next-audit" class="btn-secondary" style="padding:5px 12px; font-size:13px"
+                                onclick="changeAuditPage(1)">Siguiente</button>
+                        </div>
                     </div>
                 </div>
 
-            </div>
-
-            <!-- Tabla de auditoria de accesos -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Auditoria de Acceso</h3>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Usuario</th>
-                                <th>Accion</th>
-                                <th>Fecha y Hora</th>
-                                <th>IP Address</th>
-                                <th>Resultado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="font-mono text-sm">c.mendoza</td>
-                                <td class="font-mono text-sm">LOGIN_SUCCESS</td>
-                                <td class="text-muted text-sm">2026-05-27 08:45:12</td>
-                                <td class="font-mono text-muted text-sm">192.168.1.44</td>
-                                <td><span class="badge">OK</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-mono text-sm">j.ortega</td>
-                                <td class="font-mono text-sm">RECORD_UPDATE_PATIENT_#882</td>
-                                <td class="text-muted text-sm">2026-05-27 09:12:05</td>
-                                <td class="font-mono text-muted text-sm">10.0.0.12</td>
-                                <td><span class="badge">OK</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-mono text-sm">s.galan</td>
-                                <td class="font-mono text-sm">LOGIN_FAILURE_AUTH</td>
-                                <td class="text-muted text-sm">2026-05-27 10:38:01</td>
-                                <td class="font-mono text-muted text-sm">192.168.1.102</td>
-                                <td><span class="badge">Fallido</span></td>
-                            </tr>
-                            <tr>
-                                <td class="font-mono text-sm">m.rivas</td>
-                                <td class="font-mono text-sm">PATIENT_ADMITTED</td>
-                                <td class="text-muted text-sm">2026-05-27 11:22:47</td>
-                                <td class="font-mono text-muted text-sm">10.0.0.15</td>
-                                <td><span class="badge">OK</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </main>
+            </main>
+        </div>
     </div>
-</div>
+    <div id="modal-usuario" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Nuevo Usuario del Sistema</h2>
+                <button class="modal-close" onclick="closeModal('modal-usuario')">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid-2">
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label class="form-label">Nombre completo *</label>
+                        <input id="u-nombre" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Usuario *</label>
+                        <input id="u-usuario" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contrasena *</label>
+                        <input id="u-password" type="password" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rol *</label>
+                        <select id="u-rol" class="form-input"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('modal-usuario')">Cancelar</button>
+                <button id="btn-guardar-user" class="btn-primary" onclick="guardarUsuario()">
+                    <i class="ti ti-user-plus"></i>Crear Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-privilegios" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Permisos: <span id="priv-rol-nombre" style="color:#1e3a6e"></span></h2>
+                <button class="modal-close" onclick="closeModal('modal-privilegios')">x</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:#6b7280; margin-bottom:10px;">Selecciona las pestañas permitidas:</p>
+                <div id="lista-modulos-modal" style="display:flex; flex-direction:column; gap:10px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        Auth.requireLogin();
+        renderLayout('administracion.html');
 
-<!-- Modal para crear un usuario -->
-<div id="modal-usuario" class="modal-overlay hidden">
-    <div class="modal">
-        <div class="modal-header">
-            <h2>Nuevo Usuario del Sistema</h2>
-            <button class="modal-close" onclick="closeModal('modal-usuario')">x</button>
-        </div>
-        <div class="modal-body">
-            <div class="alert alert-info">
-                <i class="ti ti-info-circle"></i>
-                <span>Formulario de demostracion. El backend no tiene endpoint de usuarios.</span>
+        let usuariosCargados = [];
+
+        // 1. CARGAR USUARIOS
+        async function loadUsuarios() {
+            var tbody = document.getElementById('tabla-usuarios');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;"><span class="spinner spinner-dark"></span> Cargando...</td></tr>';
+
+            try {
+                var usuarios = await API.getUsuarios() || [];
+                usuariosCargados = usuarios;
+
+                if (usuarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:#9ca3af">No hay usuarios registrados.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = usuarios.map(function (u) {
+                    // 1. TRUCO DE DEBUG: Imprime el usuario en la consola para ver qué trae
+                    console.log("Datos del usuario recibidos:", u);
+
+                    var iniciales = (u.username || u.nombre_completo || 'US').substring(0, 2).toUpperCase();
+                    var userId = u.id_usuario || u.id;
+
+                    // 2. LA RED: Intentamos atrapar el rol con todos los nombres posibles
+                    var textoRol = u.nombre_rol || u.rol || u.rol_nombre || u.role || 'Sin Rol';
+
+                    var estadoBadge = u.activo
+                        ? '<span class="badge" style="background:#f0fdf4;color:#065f46;border-color:#bbf7d0">Activo</span>'
+                        : '<span class="badge" style="background:#fef2f2;color:#991b1b;border-color:#fecaca">Suspendido</span>';
+
+                    return `
+    <tr>
+        <td style="color: #6b7280; font-weight: 500;">${u.username || '-'}</td>
+        
+        <td>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="avatar">${iniciales}</div>
+                <span style="font-weight:600;">${u.nombre_completo}</span>
             </div>
-            <div class="form-grid-2">
-                <div class="form-group" style="grid-column:1/-1">
-                    <label class="form-label">Nombre completo *</label>
-                    <input class="form-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email *</label>
-                    <input type="email" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Usuario *</label>
-                    <input class="form-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contrasena *</label>
-                    <input type="password" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Rol *</label>
-                    <select class="form-input">
-                        <option>Administrador</option>
-                        <option>Doctor</option>
-                        <option>Enfermero</option>
-                        <option>Recepcionista</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeModal('modal-usuario')">Cancelar</button>
-            <button class="btn-primary" onclick="closeModal('modal-usuario')">
-                <i class="ti ti-user-plus"></i>Crear Usuario
+        </td>
+        
+        <td><span style="font-weight:500; color:#374151;">${textoRol}</span></td>
+        
+        <td>${estadoBadge}</td>
+        
+        <td style="text-align: right;">
+            <button class="btn-icon" title="Editar" 
+                onclick="abrirModalEdicion(${userId}, '${u.nombre_completo}', '${u.username || ''}', ${u.id_rol || 'null'}, '${textoRol}', ${u.activo})">
+                <i class="ti ti-pencil" style="font-size: 1.2rem; color: #6b7280;"></i>
             </button>
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error("Error al cargar usuarios:", err);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:#ef4444">Error al cargar usuarios</td></tr>';
+            }
+        }
+        let currentAuditPage = 1;
 
-<script src="js/app.js"></script>
-<script src="js/layout.js"></script>
-<script>
-    Auth.requireLogin();
-    renderLayout('administracion.html');
-</script>
+        // 2. CARGAR AUDITORÍA (LOGS) CON PAGINACIÓN Y FILTROS
+        async function loadAuditoria(page = 1) {
+            currentAuditPage = page;
+            var tbody = document.getElementById('tabla-auditoria');
+            var search = document.getElementById('audit-search').value.trim();
+            var fInicio = document.getElementById('audit-fecha-inicio').value;
+            var fFin = document.getElementById('audit-fecha-fin').value;
 
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;"><span class="spinner spinner-dark"></span> Cargando logs...</td></tr>';
+
+            try {
+                var queryParams = `?page=${page}&limit=10`;
+                if (search) queryParams += `&search=${encodeURIComponent(search)}`;
+                if (fInicio) queryParams += `&fecha_inicio=${fInicio}`;
+                if (fFin) queryParams += `&fecha_fin=${fFin}`;
+
+                var response = await fetch('http://127.0.0.1:8000/api/usuarios/auditoria' + queryParams);
+                var data = await response.json();
+
+                var logs = data.data || [];
+                var total = data.total || 0;
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#9ca3af">No hay registros que coincidan con la búsqueda.</td></tr>';
+                    document.getElementById('audit-info').textContent = "Mostrando 0 registros";
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(function (l) {
+                    var accionText = `<span style="font-weight:600; color:#374151">${l.accion}</span> en <span class="font-mono" style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:12px">${l.tabla_afectada}</span>`;
+
+                    return '<tr>' +
+                        '<td class="font-mono text-sm" style="font-weight:600; color:#1e3a6e">' + (l.username || 'Sistema') + '</td>' +
+                        '<td class="text-sm">' + accionText + '</td>' +
+                        '<td class="text-muted text-sm">' + formatDate(l.fecha_hora) + ' ' + formatTime(l.fecha_hora) + '</td>' +
+                        '<td class="font-mono text-muted text-sm">' + (l.ip_origen || '127.0.0.1') + '</td>' +
+                        '<td><span class="badge" style="background:#f0fdf4;color:#065f46;border-color:#bbf7d0">OK</span></td>' +
+                        '</tr>';
+                }).join('');
+
+                document.getElementById('audit-info').textContent = `Página ${page} • Total: ${total} registros`;
+                document.getElementById('btn-prev-audit').disabled = (page === 1);
+                document.getElementById('btn-next-audit').disabled = (page * 10 >= total);
+
+                document.getElementById('btn-prev-audit').style.opacity = (page === 1) ? '0.5' : '1';
+                document.getElementById('btn-next-audit').style.opacity = (page * 10 >= total) ? '0.5' : '1';
+
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#ef4444">Error al cargar logs</td></tr>';
+            }
+        }
+
+        function changeAuditPage(delta) {
+            loadAuditoria(currentAuditPage + delta);
+        }
+
+        // 3. CREAR NUEVO USUARIO
+        async function guardarUsuario() {
+            var rolSeleccionado = document.getElementById('u-rol').value;
+
+            if (!rolSeleccionado) {
+                alert('Por favor seleccione un rol.');
+                return;
+            }
+
+            var data = {
+                nombre_completo: document.getElementById('u-nombre').value.trim(),
+                username: document.getElementById('u-usuario').value.trim(),
+                password: document.getElementById('u-password').value,
+                rol_id: parseInt(rolSeleccionado)
+            };
+
+            if (!data.nombre_completo || !data.username || !data.password) {
+                alert('Nombre, usuario y contraseña son obligatorios.');
+                return;
+            }
+
+            setLoading('btn-guardar-user', true);
+            try {
+                await API.crearUsuario(data);
+                showToast('Usuario creado exitosamente', 'success');
+                closeModal('modal-usuario');
+
+                document.getElementById('u-nombre').value = '';
+                document.getElementById('u-usuario').value = '';
+                document.getElementById('u-password').value = '';
+                document.getElementById('u-rol').value = '';
+
+                loadUsuarios();
+            } catch (err) {
+                var mensajeError = err.message;
+                if (mensajeError === "[object Object]") {
+                    mensajeError = "Datos incompletos o incorrectos. Revisa el formulario.";
+                }
+                showToast('Error: ' + mensajeError, 'error');
+            } finally {
+                setLoading('btn-guardar-user', false);
+            }
+        }
+
+        // 4. CARGAR ROLES DROPDOWN
+        async function loadRolesDropdown() {
+            var container = document.getElementById('lista-roles');
+            var selectNuevoUser = document.getElementById('u-rol');
+            var selectEditUser = document.getElementById('e-rol');
+            selectNuevoUser.innerHTML = '<option value="">Seleccione un rol...</option>';
+
+            try {
+                var roles = await API.getRoles() || [];
+
+                container.innerHTML = roles.map(function (r) {
+                    var opt = document.createElement('option');
+                    opt.value = r.id_rol;
+                    opt.textContent = r.nombre_rol;
+                    selectNuevoUser.appendChild(opt);
+
+                    selectEditUser.appendChild(opt.cloneNode(true));
+
+                    var icon = 'ti-shield';
+                    var nombreLow = r.nombre_rol.toLowerCase();
+                    if (nombreLow.includes('médico') || nombreLow.includes('doctor')) icon = 'ti-stethoscope';
+                    else if (nombreLow.includes('enfermer')) icon = 'ti-heart-rate-monitor';
+                    else if (nombreLow.includes('recepcion')) icon = 'ti-calendar';
+
+                    return `
+                        <button style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;width:100%;transition:border-color 0.15s"
+                                onmouseover="this.style.borderColor='#1e3a6e'"
+                                onmouseout="this.style.borderColor='#e5e7eb'"
+                                onclick="gestionarPrivilegios(${r.id_rol}, '${r.nombre_rol}')">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div style="width:34px;height:34px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center">
+                                    <i class="ti ${icon}" style="font-size:16px;color:#374151"></i>
+                                </div>
+                                <div style="text-align:left">
+                                    <p style="font-size:13px;font-weight:600;color:#111827">${r.nombre_rol}</p>
+                                    <p class="text-sm text-muted">${r.descripcion || 'Sin descripción'}</p>
+                                </div>
+                            </div>
+                            <i class="ti ti-settings" style="color:#9ca3af"></i>
+                        </button>
+                    `;
+                }).join('');
+            } catch (err) {
+                container.innerHTML = '<p style="color:#ef4444;font-size:13px;text-align:center">Error al cargar roles.</p>';
+            }
+        }
+
+        // 5. GESTIONAR MÓDULOS POR ROL
+        async function gestionarPrivilegios(idRol, nombreRol) {
+            document.getElementById('priv-rol-nombre').textContent = nombreRol;
+            openModal('modal-privilegios');
+
+            // 1. Dejamos SOLO esta lista de objetos (con su id, nombre e ícono)
+            var modulos = [
+                { id: 'dashboard', nombre: 'Dashboard', icon: 'ti-layout-dashboard' },
+                { id: 'pacientes', nombre: 'Pacientes', icon: 'ti-users' },
+                { id: 'citas', nombre: 'Citas Médicas', icon: 'ti-calendar' },
+                { id: 'prescripciones', nombre: 'Prescripciones', icon: 'ti-stethoscope' },
+                { id: 'ingresos', nombre: 'Ingresos', icon: 'ti-bed' },
+                { id: 'administracion', nombre: 'Administración', icon: 'ti-shield' },
+                { id: 'reportes', nombre: 'Reportes', icon: 'ti-chart-bar' },
+                { id: 'etl', nombre: 'Carga de Datos', icon: 'ti-upload' }
+            ];
+
+            // Limpiamos y recreamos el contenedor dinámicamente
+            var container = document.getElementById('lista-modulos-modal');
+            container.innerHTML = '<div style="padding:10px;text-align:center"><span class="spinner spinner-dark"></span></div>';
+
+            try {
+                // Obtenemos los módulos que YA tiene este rol desde tu endpoint
+                var response = await fetch(`http://127.0.0.1:8000/api/usuarios/roles/${idRol}/modulos`);
+                var modulosActivos = await response.json();
+
+                // 2. Usamos m.id, m.icon y m.nombre para dibujar cada línea
+                container.innerHTML = modulos.map(m => {
+                    var isChecked = modulosActivos.includes(m.id) ? 'checked' : '';
+                    return `
+                        <label style="display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid #e5e7eb; border-radius:6px; cursor:pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                            <input type="checkbox" value="${m.id}" class="mod-checkbox" ${isChecked} style="width:16px; height:16px; accent-color:#1e3a6e;">
+                            <i class="ti ${m.icon}" style="font-size:18px; color:#6b7280;"></i>
+                            <span style="font-size:14px; font-weight:500; color:#374151">${m.nombre}</span>
+                        </label>
+                    `;
+                }).join('') + `
+                <button class="btn-primary" style="margin-top:14px; width:100%; justify-content:center;" onclick="guardarModulos(${idRol})">
+                    <i class="ti ti-device-floppy"></i> Guardar Cambios
+                </button>`;
+
+            } catch (err) {
+                container.innerHTML = '<p style="color:red; text-align:center;">Error al cargar módulos.</p>';
+            }
+        }
+
+        async function guardarModulos(idRol) {
+            var checkboxes = document.querySelectorAll('.mod-checkbox:checked');
+            var modulosSeleccionados = Array.from(checkboxes).map(cb => cb.value);
+
+            try {
+                var response = await fetch(`http://127.0.0.1:8000/api/usuarios/roles/${idRol}/modulos`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ modulos: modulosSeleccionados })
+                });
+
+                if (response.ok) {
+                    showToast('Permisos de pestañas actualizados', 'success');
+                    closeModal('modal-privilegios');
+                } else {
+                    showToast('Error al guardar', 'error');
+                }
+            } catch (err) {
+                showToast('Error de conexión', 'error');
+            }
+        }
+
+
+        // ABRIR MODAL DE EDICIÓN
+        function abrirModalEdicion(idUsuario, nombre, username, idRol, nombreRol, estadoActivo) {
+            document.getElementById('e-id-usuario').value = idUsuario;
+            document.getElementById('e-nombre').value = nombre;
+            document.getElementById('e-usuario').value = username;
+            document.getElementById('e-estado').value = estadoActivo ? "1" : "0";
+
+            var selectRol = document.getElementById('e-rol');
+
+            // Si el backend mandó el ID, lo usamos
+            if (idRol && idRol !== 'null') {
+                selectRol.value = idRol;
+            } else {
+                // Si falta el ID, buscamos el rol por su nombre en la lista
+                for (var i = 0; i < selectRol.options.length; i++) {
+                    if (selectRol.options[i].text === nombreRol) {
+                        selectRol.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            openModal('modal-editar-usuario');
+        }
+        // GUARDAR EDICIÓN
+        async function guardarEdicionUsuario() {
+            var id_usuario = document.getElementById('e-id-usuario').value;
+
+            if (!id_usuario) {
+                showToast('Error: No se detectó el ID del usuario', 'error');
+                return;
+            }
+
+            var data = {
+                id_rol: parseInt(document.getElementById('e-rol').value),
+                activo: document.getElementById('e-estado').value === "1" ? true : false
+            };
+
+            setLoading('btn-actualizar-user', true);
+            try {
+                await API.editarUsuario(id_usuario, data);
+                showToast('Usuario actualizado exitosamente', 'success');
+                closeModal('modal-editar-usuario');
+                loadUsuarios();
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            } finally {
+                setLoading('btn-actualizar-user', false);
+            }
+        }
+
+        // Inicializar tablas al cargar la página
+        loadUsuarios();
+        loadAuditoria();
+        loadRolesDropdown();
+    </script>
+
+    <style>
+        #toast-container {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            z-index: 999999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+
+        .toast-msg {
+            min-width: 250px !important;
+            padding: 12px 20px !important;
+            border-radius: 6px !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #111827 !important;
+            transform: translateX(120%) !important;
+            opacity: 0 !important;
+            transition: all 0.4s ease-out !important;
+            border-left: 5px solid #10b981 !important;
+        }
+
+        .toast-msg.show {
+            transform: translateX(0) !important;
+            opacity: 1 !important;
+        }
+
+        .toast-error {
+            border-left-color: #ef4444 !important;
+        }
+
+        .toast-info {
+            border-left-color: #3b82f6 !important;
+        }
+    </style>
+    <script>
+        window.showToast = function (mensaje, tipo = 'success') {
+            var container = document.getElementById('toast-container');
+            if (!container) { container = document.createElement('div'); container.id = 'toast-container'; document.body.appendChild(container); }
+            var icon = tipo === 'error' ? 'ti-alert-circle' : (tipo === 'info' ? 'ti-info-circle' : 'ti-circle-check');
+            var iconColor = tipo === 'error' ? '#ef4444' : (tipo === 'info' ? '#3b82f6' : '#10b981');
+            var toast = document.createElement('div');
+            toast.className = 'toast-msg toast-' + tipo;
+            toast.innerHTML = '<i class="ti ' + icon + '" style="font-size: 22px; color: ' + iconColor + '"></i><span>' + mensaje + '</span>';
+            container.appendChild(toast);
+            void toast.offsetWidth; toast.classList.add('show');
+            setTimeout(function () { toast.classList.remove('show'); setTimeout(function () { toast.remove(); }, 400); }, 3000);
+        };
+    </script>
 </body>
+
 </html>

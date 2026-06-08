@@ -100,7 +100,7 @@ def restaurar_backup(ruta_sql: str):
         logger.error("Error en restauración: %s", resultado.stderr)
         return False
 
-    logger.info("✅ Base de datos restaurada correctamente.")
+    logger.info("ase de datos restaurada correctamente.")
     return True
 
 

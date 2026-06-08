@@ -859,3 +859,43 @@ textarea.form-input {
     .topnav-links { display: none; }
     .search-top { display: none; }
 }
+
+/* Contenedor de notificaciones en la esquina inferior derecha */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Diseño de la alerta */
+.toast-msg {
+    min-width: 250px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Animación de entrada */
+.toast-msg.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Colores según el tipo */
+.toast-success { border-left: 4px solid #10b981; }
+.toast-error { border-left: 4px solid #ef4444; }
+.toast-info { border-left: 4px solid #3b82f6; }

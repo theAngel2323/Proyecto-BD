@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,387 +10,420 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        .dept-row { display:flex; align-items:center; gap:12px; padding:10px 16px; border-top:1px solid #f3f4f6; }
-        .dept-nombre { font-size:13px; font-weight:500; color:#111827; width:130px; flex-shrink:0; }
-        .dept-camas  { font-family:monospace; font-size:12px; color:#6b7280; width:60px; }
-        .status-pill { font-size:11px; font-weight:500; padding:3px 9px; border-radius:4px; background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; }
+        .dept-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .dept-nombre {
+            font-size: 13px;
+            font-weight: 500;
+            color: #111827;
+            width: 130px;
+            flex-shrink: 0;
+        }
+
+        .dept-camas {
+            font-family: monospace;
+            font-size: 12px;
+            color: #6b7280;
+            width: 60px;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 9px;
+            border-radius: 4px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
     </style>
 </head>
+
 <body>
-<div class="app-wrapper">
+    <div class="app-wrapper">
 
-    <nav id="topnav" class="topnav"></nav>
+        <nav id="topnav" class="topnav"></nav>
 
-    <div class="body-wrap">
-        <aside id="sidebar" class="sidebar"></aside>
+        <div class="body-wrap">
+            <aside id="sidebar" class="sidebar"></aside>
 
-        <main class="content">
+            <main class="content">
 
-            <div class="page-header">
-                <div>
-                    <h1>Tableros de Reportes</h1>
-                    <p>Indicadores clinicos con datos del sistema.</p>
+                <div class="page-header">
+                    <div>
+                        <h1>Tableros de Reportes</h1>
+                        <p>Indicadores clinicos con datos del sistema.</p>
+                    </div>
+                    <div class="page-header-btns">
+                        <button class="btn-secondary" onclick="init()">
+                            <i class="ti ti-refresh"></i>Actualizar
+                        </button>
+                    </div>
                 </div>
-                <div class="page-header-btns">
-                    <button class="btn-secondary" onclick="init()">
-                        <i class="ti ti-refresh"></i>Actualizar
-                    </button>
-                </div>
-            </div>
 
-            <!-- KPIs principales con datos  -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-value" id="kpi-pacientes">-</div>
-                    <div class="stat-card-label">Total Pacientes</div>
+                <!-- KPIs principales con datos  -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="kpi-pacientes">-</div>
+                        <div class="stat-card-label">Total Pacientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="kpi-citas">-</div>
+                        <div class="stat-card-label">Total Citas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="kpi-ocupacion">-</div>
+                        <div class="stat-card-label">Tasa de Ocupacion</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="kpi-stock-critico">-</div>
+                        <div class="stat-card-label">Stock Critico</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="kpi-citas">-</div>
-                    <div class="stat-card-label">Total Citas</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="kpi-ocupacion">-</div>
-                    <div class="stat-card-label">Tasa de Ocupacion</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-value" id="kpi-stock-critico">-</div>
-                    <div class="stat-card-label">Stock Critico</div>
-                </div>
-            </div>
 
-            <!-- Grafica de citas por mes -->
-            <div class="card" style="margin-bottom:16px">
-                <div class="card-header">
-                    <h3>Citas por Mes</h3>
-                </div>
-                <div class="card-body">
-                    <canvas id="chart-citas-mes" height="150"></canvas>
-                </div>
-            </div>
-
-            <div class="grid-2" style="align-items:start">
-
-                <!-- Grafica de citas por estado -->
-                <div class="card">
+                <!-- Grafica de citas por mes -->
+                <div class="card" style="margin-bottom:16px">
                     <div class="card-header">
-                        <h3>Citas por Estado</h3>
+                        <h3>Citas por Mes</h3>
                     </div>
                     <div class="card-body">
-                        <canvas id="chart-citas-estado" height="100"></canvas>
+                        <canvas id="chart-citas-mes" height="150"></canvas>
                     </div>
                 </div>
 
-                <!-- Grafica de medicamentos mas prescritos -->
-                <div class="card" style="max-height:400px">
+                <div class="grid-2" style="align-items:start">
+
+                    <!-- Grafica de citas por estado -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Citas por Estado</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chart-citas-estado" height="100"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Grafica de medicamentos mas prescritos -->
+                    <div class="card" style="max-height:400px">
+                        <div class="card-header">
+                            <h3>Medicamentos Mas Prescritos</h3>
+                        </div>
+                        <div class="card-body" id="chart-meds-container">
+                            <canvas id="chart-top-medicamentos" height="150"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tabla de ocupacion por departamento -->
+                <div class="card">
                     <div class="card-header">
-                        <h3>Medicamentos Mas Prescritos</h3>
+                        <h3>Ocupacion por Departamento</h3>
                     </div>
-                    <div class="card-body" id="chart-meds-container">
-                        <canvas id="chart-top-medicamentos" height="150"></canvas>
+                    <div class="dept-row" style="border-top:none;background:#f9fafb">
+                        <span class="dept-nombre text-xs"
+                            style="font-weight:600;text-transform:uppercase;color:#9ca3af">Area</span>
+                        <span class="dept-camas text-xs"
+                            style="font-weight:600;text-transform:uppercase;color:#9ca3af">Ocupadas</span>
+                        <span class="dept-camas text-xs"
+                            style="font-weight:600;text-transform:uppercase;color:#9ca3af">Capacidad</span>
+                        <div style="flex:1"></div>
+                        <span style="width:80px;text-align:right" class="text-xs"
+                            style="color:#9ca3af;font-weight:600;text-transform:uppercase">Estado</span>
                     </div>
-                </div>
-
-            </div>
-
-            <!-- Tabla de ocupacion por departamento -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Ocupacion por Departamento</h3>
-                </div>
-                <div class="dept-row" style="border-top:none;background:#f9fafb">
-                    <span class="dept-nombre text-xs" style="font-weight:600;text-transform:uppercase;color:#9ca3af">Area</span>
-                    <span class="dept-camas text-xs"  style="font-weight:600;text-transform:uppercase;color:#9ca3af">Ocupadas</span>
-                    <span class="dept-camas text-xs"  style="font-weight:600;text-transform:uppercase;color:#9ca3af">Capacidad</span>
-                    <div style="flex:1"></div>
-                    <span style="width:80px;text-align:right" class="text-xs" style="color:#9ca3af;font-weight:600;text-transform:uppercase">Estado</span>
-                </div>
-                <div id="tabla-ocupacion">
-                    <div style="text-align:center;padding:40px;color:#9ca3af">
-                        <span class="spinner spinner-dark"></span> Cargando...
+                    <div id="tabla-ocupacion">
+                        <div style="text-align:center;padding:40px;color:#9ca3af">
+                            <span class="spinner spinner-dark"></span> Cargando...
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tabla de medicamentos con stock critico -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Medicamentos con Stock Critico</h3>
-                    <span class="text-sm text-muted">Stock por debajo del minimo</span>
+                <!-- Tabla de medicamentos con stock critico -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Medicamentos con Stock Critico</h3>
+                        <span class="text-sm text-muted">Stock por debajo del minimo</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Medicamento</th>
+                                    <th>Presentacion</th>
+                                    <th>Stock Actual</th>
+                                    <th>Stock Minimo</th>
+                                    <th>Diferencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-stock-critico">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;padding:40px;color:#9ca3af">
+                                        <span class="spinner spinner-dark"></span> Cargando...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Medicamento</th>
-                                <th>Presentacion</th>
-                                <th>Stock Actual</th>
-                                <th>Stock Minimo</th>
-                                <th>Diferencia</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-stock-critico">
-                            <tr>
-                                <td colspan="5" style="text-align:center;padding:40px;color:#9ca3af">
-                                    <span class="spinner spinner-dark"></span> Cargando...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
-        </main>
+            </main>
+        </div>
     </div>
-</div>
 
-<script src="js/app.js"></script>
-<script src="js/layout.js"></script>
-<script>
-    Auth.requireLogin();
-    renderLayout('reportes.html');
+    <script src="js/app.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        Auth.requireLogin();
+        renderLayout('reportes'); // CORREGIDO: Sin el '.html' para evitar el bucle de redirección
 
-    // Instancias de graficas para destruirlas antes de recrearlas
-    var chartCitasEstado = null;
-    var chartTopMeds     = null;
-    var chartCitasMes    = null;
+        // Instancias de graficas para destruirlas antes de recrearlas
+        var chartCitasEstado = null;
+        var chartTopMeds = null;
+        var chartCitasMes = null;
 
-    // Carga todos los datos en paralelo
-    async function init() {
-        try {
-            var res = await Promise.allSettled([
-                API.getPacientes(),
-                API.getCitas(),
-                API.getOcupacion(),
-                API.getStockCritico(),
-                API.getTopMedicamentos()
-            ]);
+        // Carga todos los datos en paralelo
+        async function init() {
+            try {
+                var res = await Promise.allSettled([
+                    API.getPacientes(),
+                    API.getCitas(),
+                    API.getOcupacion(),
+                    API.getStockCritico(),
+                    API.getTopMedicamentos()
+                ]);
 
-            var pacientes    = res[0].status === 'fulfilled' ? res[0].value || [] : [];
-            var citas        = res[1].status === 'fulfilled' ? res[1].value || [] : [];
-            var ocupacion    = res[2].status === 'fulfilled' ? res[2].value || [] : [];
-            var stockCritico = res[3].status === 'fulfilled' ? res[3].value || [] : [];
-            var topMeds      = res[4].status === 'fulfilled' ? res[4].value || [] : [];
+                var pacientes = res[0].status === 'fulfilled' ? res[0].value || [] : [];
+                var citas = res[1].status === 'fulfilled' ? res[1].value || [] : [];
+                var ocupacion = res[2].status === 'fulfilled' ? res[2].value || [] : [];
+                var stockCritico = res[3].status === 'fulfilled' ? res[3].value || [] : [];
+                var topMeds = res[4].status === 'fulfilled' ? res[4].value || [] : [];
 
-            // Calcular tasa de ocupacion general
-            var totalCamas    = ocupacion.reduce(function(s, a) { return s + (a.capacidad_camas || 0); }, 0);
-            var totalOcupadas = ocupacion.reduce(function(s, a) { return s + (a.ocupados || 0); }, 0);
-            var pct = totalCamas > 0 ? Math.round((totalOcupadas / totalCamas) * 100) : 0;
+                // Calcular tasa de ocupacion general
+                var totalCamas = ocupacion.reduce(function (s, a) { return s + (a.capacidad_camas || 0); }, 0);
+                var totalOcupadas = ocupacion.reduce(function (s, a) { return s + (a.ocupados || 0); }, 0);
+                var pct = totalCamas > 0 ? Math.round((totalOcupadas / totalCamas) * 100) : 0;
 
-            // Actualizar KPIs
-            document.getElementById('kpi-pacientes').textContent     = pacientes.length;
-            document.getElementById('kpi-citas').textContent         = citas.length;
-            document.getElementById('kpi-ocupacion').textContent     = pct + '%';
-            document.getElementById('kpi-stock-critico').textContent = stockCritico.length;
+                // Actualizar KPIs
+                document.getElementById('kpi-pacientes').textContent = pacientes.length;
+                document.getElementById('kpi-citas').textContent = citas.length;
+                document.getElementById('kpi-ocupacion').textContent = pct + '%';
+                document.getElementById('kpi-stock-critico').textContent = stockCritico.length;
 
-            // Renderizar todas las graficas y tablas
-            renderGraficaCitasMes(citas);
-            renderGraficaCitasEstado(citas);
-            renderGraficaMedicamentos(topMeds);
-            renderOcupacion(ocupacion);
-            renderStockCritico(stockCritico);
+                // Renderizar todas las graficas y tablas
+                renderGraficaCitasMes(citas);
+                renderGraficaCitasEstado(citas);
+                renderGraficaMedicamentos(topMeds);
+                renderOcupacion(ocupacion);
+                renderStockCritico(stockCritico);
 
-        } catch (err) {
-            console.error('Error cargando reportes:', err);
+            } catch (err) {
+                console.error('Error cargando reportes:', err);
+            }
         }
-    }
 
-    // Grafica de barras: citas agrupadas por mes del año actual
-    function renderGraficaCitasMes(citas) {
-        var meses  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-        var conteo = [0,0,0,0,0,0,0,0,0,0,0,0];
-        var anioActual = new Date().getFullYear();
+        // Grafica de barras: citas agrupadas por mes del año actual
+        function renderGraficaCitasMes(citas) {
+            var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            var conteo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            var anioActual = new Date().getFullYear();
 
-        citas.forEach(function(c) {
-            if (c.fecha_hora) {
-                var fecha = new Date(c.fecha_hora);
-                // Solo contar citas del año actual
-                if (fecha.getFullYear() === anioActual) {
-                    conteo[fecha.getMonth()]++;
+            citas.forEach(function (c) {
+                if (c.fecha_hora) {
+                    var fecha = new Date(c.fecha_hora);
+                    // Solo contar citas del año actual
+                    if (fecha.getFullYear() === anioActual) {
+                        conteo[fecha.getMonth()]++;
+                    }
                 }
-            }
-        });
+            });
 
-        if (chartCitasMes) chartCitasMes.destroy();
-        var ctx = document.getElementById('chart-citas-mes');
-        if (!ctx) return;
+            if (chartCitasMes) chartCitasMes.destroy();
+            var ctx = document.getElementById('chart-citas-mes');
+            if (!ctx) return;
 
-        chartCitasMes = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: meses,
-                datasets: [{
-                    label: 'Citas',
-                    data: conteo,
-                    backgroundColor: '#1e3a6e',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { color: '#f3f4f6' }, ticks: { color: '#9ca3af' } },
-                    y: {
-                        grid: { color: '#f3f4f6' },
-                        ticks: { color: '#9ca3af', stepSize: 1 },
-                        beginAtZero: true
-                    }
+            chartCitasMes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: meses,
+                    datasets: [{
+                        label: 'Citas',
+                        data: conteo,
+                        backgroundColor: '#1e3a6e',
+                        borderRadius: 4
+                    }]
                 },
-                responsive: true
-            }
-        });
-    }
-
-    // Grafica de dona: distribucion de citas por estado
-    function renderGraficaCitasEstado(citas) {
-        var conteo = {};
-        citas.forEach(function(c) {
-            var estado = c.estado || 'Pendiente';
-            conteo[estado] = (conteo[estado] || 0) + 1;
-        });
-
-        if (chartCitasEstado) chartCitasEstado.destroy();
-        var ctx = document.getElementById('chart-citas-estado');
-        if (!ctx) return;
-
-        if (Object.keys(conteo).length === 0) {
-            ctx.parentElement.innerHTML =
-                '<p class="text-muted text-sm" style="text-align:center;padding:20px">Sin datos de citas.</p>';
-            return;
-        }
-
-        chartCitasEstado = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(conteo),
-                datasets: [{
-                    data: Object.values(conteo),
-                    backgroundColor: ['#1e3a6e', '#374151', '#6b7280', '#9ca3af'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { font: { family: 'DM Sans', size: 12 }, color: '#374151' }
-                    }
-                },
-                responsive: true
-            }
-        });
-    }
-
-    // Grafica de barras horizontales: top medicamentos prescritos
-    function renderGraficaMedicamentos(topMeds) {
-        if (chartTopMeds) chartTopMeds.destroy();
-        var container = document.getElementById('chart-meds-container');
-        var ctx = document.getElementById('chart-top-medicamentos');
-        if (!ctx) return;
-
-        if (!topMeds || topMeds.length === 0) {
-            container.innerHTML =
-                '<p class="text-muted text-sm" style="text-align:center;padding:20px">' +
-                'Sin datos de prescripciones aun.</p>';
-            return;
-        }
-
-        // El backend devuelve el campo como total_prescripciones
-        var labels  = topMeds.map(function(m) { return m.nombre_generico || 'Medicamento'; });
-        var valores = topMeds.map(function(m) { return m.total_prescripciones || 0; });
-
-        chartTopMeds = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Prescripciones',
-                    data: valores,
-                    backgroundColor: '#1e3a6e',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: {
-                        grid: { color: '#f3f4f6' },
-                        ticks: { color: '#9ca3af', stepSize: 1 },
-                        beginAtZero: true
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#f3f4f6' }, ticks: { color: '#9ca3af' } },
+                        y: {
+                            grid: { color: '#f3f4f6' },
+                            ticks: { color: '#9ca3af', stepSize: 1 },
+                            beginAtZero: true
+                        }
                     },
-                    y: { grid: { display: false }, ticks: { color: '#374151' } }
-                },
-                responsive: true
-            }
-        });
-    }
-
-    // Tabla de ocupacion por area con datos  del backend
-    function renderOcupacion(ocupacion) {
-        var container = document.getElementById('tabla-ocupacion');
-
-        if (ocupacion.length === 0) {
-            container.innerHTML =
-                '<p class="text-muted text-sm" style="padding:20px;text-align:center">' +
-                'Sin datos de ocupacion. Registra ingresos para ver datos.</p>';
-            return;
+                    responsive: true
+                }
+            });
         }
 
-        container.innerHTML = ocupacion.map(function(a) {
-            var ocupados  = a.ocupados || 0;
-            var capacidad = a.capacidad_camas || 0;
-            var pct       = capacidad > 0 ? Math.round((ocupados / capacidad) * 100) : 0;
+        // Grafica de dona: distribucion de citas por estado
+        function renderGraficaCitasEstado(citas) {
+            var conteo = {};
+            citas.forEach(function (c) {
+                var estado = c.estado || 'Pendiente';
+                conteo[estado] = (conteo[estado] || 0) + 1;
+            });
 
-            // Estado segun porcentaje
-            var estado;
-            if (pct >= 90)      estado = 'CRITICO';
-            else if (pct >= 75) estado = 'ALTO';
-            else if (pct >= 50) estado = 'NORMAL';
-            else                estado = 'BAJO';
+            if (chartCitasEstado) chartCitasEstado.destroy();
+            var ctx = document.getElementById('chart-citas-estado');
+            if (!ctx) return;
 
-            return '<div class="dept-row">' +
-                '<span class="dept-nombre">' + (a.nombre_area || 'Area') + '</span>' +
-                '<span class="dept-camas">' + ocupados + '</span>' +
-                '<span class="dept-camas">' + capacidad + '</span>' +
-                '<div style="flex:1;display:flex;align-items:center;gap:8px">' +
+            if (Object.keys(conteo).length === 0) {
+                ctx.parentElement.innerHTML =
+                    '<p class="text-muted text-sm" style="text-align:center;padding:20px">Sin datos de citas.</p>';
+                return;
+            }
+
+            chartCitasEstado = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(conteo),
+                    datasets: [{
+                        data: Object.values(conteo),
+                        backgroundColor: ['#1e3a6e', '#374151', '#6b7280', '#9ca3af'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: 'DM Sans', size: 12 }, color: '#374151' }
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        }
+
+        // Grafica de barras horizontales: top medicamentos prescritos
+        function renderGraficaMedicamentos(topMeds) {
+            if (chartTopMeds) chartTopMeds.destroy();
+            var container = document.getElementById('chart-meds-container');
+            var ctx = document.getElementById('chart-top-medicamentos');
+            if (!ctx) return;
+
+            if (!topMeds || topMeds.length === 0) {
+                container.innerHTML =
+                    '<p class="text-muted text-sm" style="text-align:center;padding:20px">' +
+                    'Sin datos de prescripciones aun.</p>';
+                return;
+            }
+
+            var labels = topMeds.map(function (m) { return m.nombre_generico || 'Medicamento'; });
+            var valores = topMeds.map(function (m) { return m.total_prescripciones || 0; });
+
+            chartTopMeds = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Prescripciones',
+                        data: valores,
+                        backgroundColor: '#1e3a6e',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { color: '#f3f4f6' },
+                            ticks: { color: '#9ca3af', stepSize: 1 },
+                            beginAtZero: true
+                        },
+                        y: { grid: { display: false }, ticks: { color: '#374151' } }
+                    },
+                    responsive: true
+                }
+            });
+        }
+
+        // Tabla de ocupacion por area con datos del backend
+        function renderOcupacion(ocupacion) {
+            var container = document.getElementById('tabla-ocupacion');
+            if (!container) return;
+
+            if (ocupacion.length === 0) {
+                container.innerHTML =
+                    '<p class="text-muted text-sm" style="padding:20px;text-align:center">' +
+                    'Sin datos de ocupacion. Registra ingresos para ver datos.</p>';
+                return;
+            }
+
+            container.innerHTML = ocupacion.map(function (a) {
+                var ocupados = a.ocupados || 0;
+                var capacidad = a.capacidad_camas || 0;
+                var pct = capacidad > 0 ? Math.round((ocupados / capacidad) * 100) : 0;
+
+                var estado;
+                if (pct >= 90) estado = 'CRITICO';
+                else if (pct >= 75) estado = 'ALTO';
+                else if (pct >= 50) estado = 'NORMAL';
+                else estado = 'BAJO';
+
+                return '<div class="dept-row">' +
+                    '<span class="dept-nombre">' + (a.nombre_area || 'Area') + '</span>' +
+                    '<span class="dept-camas">' + ocupados + '</span>' +
+                    '<span class="dept-camas">' + capacidad + '</span>' +
+                    '<div style="flex:1;display:flex;align-items:center;gap:8px">' +
                     '<div class="bar-track" style="flex:1">' +
-                        '<div class="bar-fill" style="width:' + pct + '%"></div>' +
+                    '<div class="bar-fill" style="width:' + pct + '%"></div>' +
                     '</div>' +
                     '<span class="text-xs text-muted">' + pct + '%</span>' +
-                '</div>' +
-                '<span class="status-pill">' + estado + '</span>' +
-            '</div>';
-        }).join('');
-    }
-
-    // Tabla de medicamentos con stock critico
-    function renderStockCritico(stockCritico) {
-        var tbody = document.getElementById('tabla-stock-critico');
-
-        if (stockCritico.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af">' +
-                'No hay medicamentos en stock critico.</td></tr>';
-            return;
+                    '</div>' +
+                    '<span class="status-pill">' + estado + '</span>' +
+                    '</div>';
+            }).join('');
         }
 
-        tbody.innerHTML = stockCritico.map(function(m) {
-            var diferencia = (m.stock_actual || 0) - (m.stock_minimo || 0);
-            return '<tr>' +
-                '<td style="font-weight:600;color:#111827">' +
+        // Tabla de medicamentos con stock critico
+        function renderStockCritico(stockCritico) {
+            var tbody = document.getElementById('tabla-stock-critico');
+            if (!tbody) return;
+
+            if (stockCritico.length === 0) {
+                tbody.innerHTML =
+                    '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af">' +
+                    'No hay medicamentos en stock critico.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = stockCritico.map(function (m) {
+                var diferencia = (m.stock_actual || 0) - (m.stock_minimo || 0);
+                return '<tr>' +
+                    '<td style="font-weight:600;color:#111827">' +
                     (m.nombre_generico || '-') +
                     '<br><span class="text-sm text-muted">' + (m.nombre_comercial || '') + '</span>' +
-                '</td>' +
-                '<td class="text-muted">' + (m.presentacion || '-') + '</td>' +
-                '<td class="font-mono" style="font-weight:700">' + (m.stock_actual || 0) + '</td>' +
-                '<td class="font-mono text-muted">' + (m.stock_minimo || 0) + '</td>' +
-                '<td class="font-mono" style="color:#991b1b;font-weight:600">' + diferencia + '</td>' +
-            '</tr>';
-        }).join('');
-    }
+                    '</td>' +
+                    '<td class="text-muted">' + (m.presentacion || '-') + '</td>' +
+                    '<td class="font-mono" style="font-weight:700">' + (m.stock_actual || 0) + '</td>' +
+                    '<td class="font-mono text-muted">' + (m.stock_minimo || 0) + '</td>' +
+                    '<td class="font-mono" style="color:#991b1b;font-weight:600">' + diferencia + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
 
-    init();
-</script>
-
+        init();
+    </script>
 </body>
+
 </html>
